@@ -18,7 +18,7 @@ The page is designed to work as a **desktop and mobile-friendly educational page
 - **Why the zoom appears endless** — a reader-friendly explanation of the set’s rich boundary structure.
 - **Mathematical relevance** — links to complex dynamics, Julia sets, chaos, stability, and mathematical visualisation.
 
-## Interactive controls
+## Interactive features
 
 - **Tap / click** on the Mandelbrot image to zoom in at that point.
 - **Drag** to pan the view.

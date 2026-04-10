@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1020" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Mandelbrot" />
-  <meta name="description" content="An interactive introduction to the Mandelbrot Set with zooming fractal explorer, orbit diagrams, and clear explanations." />
+  <meta name="description" content="An interactive introduction to the Mandelbrot Set with a zoomable fractal explorer, orbit diagrams, and mathematical exposition." />
   <title>The Mandelbrot Set | CJF Hal AI</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
@@ -540,17 +540,17 @@
       </div>
       <h1>The Mandelbrot Set</h1>
       <p class="hero-subtitle">
-        A simple rule on complex numbers produces one of the most famous images in mathematics.
+        A simple iterative rule on complex numbers produces one of the central objects of complex dynamics.
       </p>
       <p class="hero-lede">
-        You are exactly right about the basic idea: each point stands for a complex number <span class="math">c</span>, we iterate
-        <span class="math">z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span>, and the colours show how quickly the orbit escapes to infinity or how long it appears to stay bounded.
+        Each point represents a complex number <span class="math">c</span>, the iteration
+        <span class="math">z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span> is applied, and the colours indicate how rapidly the orbit escapes to infinity or how long it remains bounded.
       </p>
       <div class="pill-row" aria-label="Highlights">
         <span class="pill">Interactive zoom explorer</span>
-        <span class="pill">Touch-friendly for iPhone and iPad</span>
+        <span class="pill">Optimised for iPhone and iPad</span>
         <span class="pill">Orbit diagram for a chosen point</span>
-        <span class="pill">Clear explanation of the maths</span>
+        <span class="pill">Mathematical exposition and diagrams</span>
       </div>
     </header>
 
@@ -560,7 +560,7 @@
           <div>
             <h2 id="explorer-title">Interactive Mandelbrot Explorer</h2>
             <p class="muted" style="margin-top:0">
-              Tap or click to zoom in at a point. Drag to pan. Mouse wheel also zooms on PC. Use the tour to keep zooming in and out automatically.
+              Select a point near the coloured boundary to zoom in. Drag to pan. Mouse-wheel zoom is supported on desktop systems. The tour follows curated high-detail regions rather than drifting into uniform interior or exterior views.
             </p>
           </div>
           <div class="status-badge" id="renderStatusBadge">
@@ -582,7 +582,7 @@
           <button type="button" class="btn" id="zoomOutBtn">Zoom -</button>
           <button type="button" class="btn btn-muted" id="resetBtn">Reset</button>
           <button type="button" class="btn btn-muted" id="tourBtn">Auto Tour</button>
-          <button type="button" class="btn btn-muted" id="classicBtn">Classic Focus</button>
+          <button type="button" class="btn btn-muted" id="classicBtn">Next Region</button>
           <div class="range-wrap">
             <label for="detailSlider">
               <span>Extra detail</span>
@@ -591,6 +591,7 @@
             <input id="detailSlider" type="range" min="80" max="420" step="10" value="140" />
           </div>
         </div>
+        <div class="example-row" id="focusButtons" aria-label="Selected Mandelbrot regions"></div>
 
         <div class="stats-grid">
           <div class="stat">
@@ -642,7 +643,7 @@
         <aside class="card">
           <h2>Bounded vs unbounded</h2>
           <p>
-            Your description is correct. The black interior corresponds to points whose orbits appear bounded. The bright bands outside show points that escape, coloured by <em>how quickly</em> they escape.
+            The black interior corresponds to points whose orbits remain bounded. The coloured bands outside mark points that escape, with colour determined by <em>how quickly</em> escape occurs.
           </p>
           <div class="legend-bar" aria-hidden="true"></div>
           <div class="legend-labels" aria-hidden="true">
@@ -695,14 +696,14 @@
             </svg>
           </div>
           <p class="figure-note">
-            The computer repeats this test for every pixel. The famous shape appears because the boundary between stable and unstable behaviour is extraordinarily intricate.
+            The computation is repeated for every pixel. The resulting shape is governed by the extraordinarily intricate boundary between stable and unstable behaviour.
           </p>
         </article>
 
         <article class="card">
           <h2>Orbit diagram for one point</h2>
           <p>
-            This panel shows the actual orbit of a chosen complex number <span class="math">c</span>. It is the same calculation as the big image, but now you can watch the sequence point by point.
+            This panel shows the orbit of a chosen complex number <span class="math">c</span>. It is the same iteration used to generate the full image, displayed here term by term.
           </p>
           <div class="fractal-stage" style="aspect-ratio: 1 / 1; min-height: 280px;">
             <canvas id="orbitCanvas" aria-label="Orbit diagram for a selected complex number"></canvas>
@@ -716,15 +717,15 @@
 
       <section class="two-col">
         <article class="card">
-          <h2>Why the zoom feels endless</h2>
+          <h2>Why the boundary supports unbounded detail</h2>
           <p>
-            The boundary of the Mandelbrot Set is not a smooth curve. It contains structure at every scale, so when you zoom in you keep finding spirals, bulbs, filaments, and miniature Mandelbrot copies.
+            The boundary of the Mandelbrot Set is not a smooth curve. It contains structure at every scale, so increased magnification continues to reveal spirals, bulbs, filaments, and miniature Mandelbrot copies.
           </p>
           <p>
-            It is not exact self-similarity in the simple way a snowflake pattern might repeat. Instead it has an endless supply of new detail produced by the same rule applied at finer and finer scales.
+            The structure is not exactly self-similar in the elementary sense of a simple repeating motif. Instead, the same iterative rule generates further layers of detail at progressively smaller scales.
           </p>
           <p class="muted">
-            This page can zoom very deeply for an in-browser demo, but any computer eventually hits finite precision. The mathematics does not stop - only the numerical approximation does.
+            This implementation permits substantial magnification within the browser, but any computation is ultimately limited by finite precision. The mathematical object is not limited in this way; only its numerical approximation is.
           </p>
         </article>
 
@@ -734,13 +735,13 @@
             <li><strong>Complex dynamics:</strong> it is a central object in studying repeated functions.</li>
             <li><strong>Julia sets:</strong> each value of <span class="math">c</span> has a related Julia set, and the Mandelbrot Set organises which Julia sets are connected.</li>
             <li><strong>Chaos and stability:</strong> it shows how tiny changes in input can cause huge qualitative changes in long-term behaviour.</li>
-            <li><strong>Computation and visualisation:</strong> it is a classic example of mathematics becoming visible through algorithms.</li>
+            <li><strong>Computation and visualisation:</strong> it is a canonical example of how algorithms render abstract mathematical structure visible.</li>
           </ul>
         </article>
       </section>
 
       <section class="card">
-        <h2>Three useful ways to think about it</h2>
+        <h2>Three mathematical viewpoints</h2>
         <div class="fact-cards">
           <div class="fact">
             <strong>1. A set of numbers</strong>
@@ -752,7 +753,7 @@
           </div>
           <div class="fact">
             <strong>3. A geometric object</strong>
-            The algebra creates a striking boundary with rich geometry and deep links to other branches of maths.
+            The algebra defines a boundary with rich geometry and deep connections to other branches of mathematics.
           </div>
         </div>
 
@@ -780,6 +781,15 @@
       var timeReadout = document.getElementById("timeReadout");
       var renderStatusText = document.getElementById("renderStatusText");
       var renderStatusDot = document.getElementById("renderStatusDot");
+      var focusButtons = document.getElementById("focusButtons");
+
+      var focusStops = [
+        { label: "Seahorse Valley", x: -0.745428, y: 0.113009, buttonScale: 0.22, startScale: 0.34, endScale: 0.0012, duration: 6200 },
+        { label: "Double Spiral", x: -0.77568377, y: 0.13646737, buttonScale: 0.11, startScale: 0.19, endScale: 0.00072, duration: 6200 },
+        { label: "Mini Mandelbrot", x: -1.25066, y: 0.02012, buttonScale: 0.1, startScale: 0.18, endScale: 0.0011, duration: 6000 },
+        { label: "Elephant Valley", x: 0.282, y: 0.008, buttonScale: 0.2, startScale: 0.32, endScale: 0.0015, duration: 6200 },
+        { label: "Filament Fans", x: -0.1011, y: 0.9563, buttonScale: 0.11, startScale: 0.18, endScale: 0.0018, duration: 5600 }
+      ];
 
       var initialState = {
         centerX: -0.5,
@@ -798,15 +808,15 @@
         currentJob: 0,
         latestDuration: 0,
         autoTour: false,
-        autoDirection: -1,
         anchorX: initialState.centerX,
         anchorY: initialState.centerY,
         renderTimer: null,
-        lastTourRender: 0
+        focusIndex: -1,
+        autoTourIndex: 0,
+        tourStart: 0
       };
 
       var drag = null;
-      var classicFocus = { x: -0.743643887037151, y: 0.13182590420533 };
 
       function createWorker() {
         var workerSource = [
@@ -821,11 +831,14 @@
           "  var maxIter = data.maxIter;",
           "  var aspect = height / width;",
           "  var start = Date.now();",
+          "  var sampleStepX = Math.max(1, Math.floor(width / 44));",
+          "  var sampleStepY = Math.max(1, Math.floor(height / 28));",
+          "  var sample = { count: 0, dark: 0, warm: 0, boundary: 0 };",
           "  function palette(t) {",
-          "    var r = Math.floor(128 + 127 * Math.cos(6.28318 * (t + 0.02)));",
-          "    var g = Math.floor(128 + 127 * Math.cos(6.28318 * (t + 0.28)));",
-          "    var b = Math.floor(128 + 127 * Math.cos(6.28318 * (t + 0.54)));",
-          "    return [r, g, b];",
+          "    var r = Math.floor(120 + 120 * Math.cos(6.28318 * (t + 0.02)) + 35 * Math.cos(18.8495 * (t + 0.12)));",
+          "    var g = Math.floor(110 + 110 * Math.cos(6.28318 * (t + 0.24)));",
+          "    var b = Math.floor(125 + 120 * Math.cos(6.28318 * (t + 0.53)));",
+          "    return [Math.max(0, Math.min(255, r)), Math.max(0, Math.min(255, g)), Math.max(0, Math.min(255, b))];",
           "  }",
           "  for (var py = 0; py < height; py++) {",
           "    var imag = cy + ((py / height) - 0.5) * scale * aspect;",
@@ -850,15 +863,21 @@
           "      } else {",
           "        var mag = Math.sqrt(zx * zx + zy * zy);",
           "        var smooth = iter;",
-          "        if (mag > 0) {",
-          "          smooth = iter + 1 - Math.log(Math.log(mag)) / Math.log(2);",
-          "        }",
-          "        var t = smooth / maxIter;",
-          "        var rgb = palette(Math.max(0, Math.min(1, t)));",
+          "        if (mag > 0) smooth = iter + 1 - Math.log(Math.log(mag)) / Math.log(2);",
+          "        var t = Math.max(0, Math.min(1, smooth / maxIter));",
+          "        var rgb = palette(t);",
           "        buffer[idx] = rgb[0];",
           "        buffer[idx + 1] = rgb[1];",
           "        buffer[idx + 2] = rgb[2];",
           "        buffer[idx + 3] = 255;",
+          "      }",
+          "      if (px % sampleStepX === 0 && py % sampleStepY === 0) {",
+          "        sample.count++;",
+          "        if (iter >= maxIter) sample.dark++;",
+          "        else {",
+          "          if (iter > 6 && iter < maxIter * 0.92) sample.boundary++;",
+          "          if (iter > maxIter * 0.42 && iter < maxIter * 0.78) sample.warm++;",
+          "        }",
           "      }",
           "    }",
           "  }",
@@ -867,6 +886,7 @@
           "    width: width,",
           "    height: height,",
           "    duration: Date.now() - start,",
+          "    sample: sample,",
           "    buffer: buffer.buffer",
           "  }, [buffer.buffer]);",
           "};"
@@ -876,24 +896,34 @@
       }
 
       var worker = createWorker();
+      var focusButtonNodes = [];
 
-      worker.onmessage = function (event) {
-        var data = event.data;
-        if (data.id !== state.currentJob) return;
+      function effectiveIterations() {
+        var ratio = Math.max(1, initialState.scale / state.scale);
+        var zoomDepth = Math.log(ratio) / Math.LN10;
+        return Math.max(60, Math.round(state.baseIter + zoomDepth * 48));
+      }
 
-        fractalCanvas.width = data.width;
-        fractalCanvas.height = data.height;
-        fractalCtx.putImageData(new ImageData(new Uint8ClampedArray(data.buffer), data.width, data.height), 0, 0);
-        state.rendering = false;
-        state.latestDuration = data.duration;
-        updateReadouts();
-        setStatus("Ready", false);
+      function formatNumber(value) {
+        if (Math.abs(value) >= 0.001 && Math.abs(value) < 1000) return value.toFixed(12);
+        return value.toExponential(6);
+      }
 
-        if (state.queued) {
-          state.queued = false;
-          renderNow();
-        }
-      };
+      function formatComplex(x, y) {
+        var sign = y >= 0 ? "+" : "-";
+        return formatNumber(x) + " " + sign + " " + formatNumber(Math.abs(y)) + "i";
+      }
+
+      function classifySample(sample) {
+        if (!sample || !sample.count) return "Ready";
+        var darkRatio = sample.dark / sample.count;
+        var boundaryRatio = sample.boundary / sample.count;
+        var warmRatio = sample.warm / sample.count;
+        if (boundaryRatio > 0.22) return "Boundary-dominant view";
+        if (darkRatio > 0.84) return "Interior-dominant view";
+        if (warmRatio > 0.56 && darkRatio < 0.08) return "Exterior-dominant view";
+        return "Mixed boundary structure";
+      }
 
       function setStatus(text, busy) {
         renderStatusText.textContent = text;
@@ -903,10 +933,10 @@
           : "0 0 0 0.22rem rgba(52, 211, 153, 0.18)";
       }
 
-      function effectiveIterations() {
-        var ratio = Math.max(1, initialState.scale / state.scale);
-        var zoomDepth = Math.log(ratio) / Math.LN10;
-        return Math.max(50, Math.round(state.baseIter + zoomDepth * 46));
+      function updateFocusButtons() {
+        focusButtonNodes.forEach(function (button, index) {
+          button.classList.toggle("is-selected", index === state.focusIndex);
+        });
       }
 
       function updateReadouts() {
@@ -917,18 +947,7 @@
         detailReadout.textContent = state.baseIter + " iterations base";
         tourBtn.classList.toggle("btn-active", state.autoTour);
         tourBtn.textContent = state.autoTour ? "Stop Tour" : "Auto Tour";
-      }
-
-      function formatNumber(value) {
-        if (Math.abs(value) >= 0.001 && Math.abs(value) < 1000) {
-          return value.toFixed(12);
-        }
-        return value.toExponential(6);
-      }
-
-      function formatComplex(x, y) {
-        var sign = y >= 0 ? "+" : "-";
-        return formatNumber(x) + " " + sign + " " + formatNumber(Math.abs(y)) + "i";
+        updateFocusButtons();
       }
 
       function scheduleRender(delay) {
@@ -966,6 +985,24 @@
         });
       }
 
+      function stopAutoTour() {
+        state.autoTour = false;
+        state.tourStart = 0;
+      }
+
+      function jumpToFocus(index, renderImmediately) {
+        var normalized = (index + focusStops.length) % focusStops.length;
+        var stop = focusStops[normalized];
+        state.focusIndex = normalized;
+        state.centerX = stop.x;
+        state.centerY = stop.y;
+        state.scale = stop.buttonScale;
+        state.anchorX = stop.x;
+        state.anchorY = stop.y;
+        updateReadouts();
+        if (renderImmediately) renderNow();
+      }
+
       function zoomAt(factor, anchorX, anchorY) {
         state.centerX = anchorX + (state.centerX - anchorX) * factor;
         state.centerY = anchorY + (state.centerY - anchorY) * factor;
@@ -985,52 +1022,108 @@
         };
       }
 
+      function iteratePoint(real, imag, limit) {
+        var zx = 0;
+        var zy = 0;
+        for (var iter = 0; iter < limit; iter++) {
+          var x2 = zx * zx - zy * zy + real;
+          var y2 = 2 * zx * zy + imag;
+          zx = x2;
+          zy = y2;
+          if (zx * zx + zy * zy > 4) return iter + 1;
+        }
+        return limit;
+      }
+
+      function findInterestingAnchor(targetX, targetY) {
+        var rect = fractalCanvas.getBoundingClientRect();
+        var limit = Math.min(120, effectiveIterations());
+        var spanX = state.scale * 0.11;
+        var spanY = spanX * (rect.height / rect.width);
+        var best = null;
+
+        for (var row = -3; row <= 3; row++) {
+          for (var col = -3; col <= 3; col++) {
+            var x = targetX + (col / 3) * spanX;
+            var y = targetY + (row / 3) * spanY;
+            var iter = iteratePoint(x, y, limit);
+            if (iter >= limit || iter < 3) continue;
+            var norm = iter / limit;
+            var dist = Math.sqrt(col * col + row * row) / 4.25;
+            var score = Math.abs(norm - 0.42) + dist * 0.34;
+            if (!best || score < best.score) best = { x: x, y: y, score: score };
+          }
+        }
+
+        return best ? { x: best.x, y: best.y } : { x: targetX, y: targetY };
+      }
+
       function resetView() {
+        stopAutoTour();
         state.centerX = initialState.centerX;
         state.centerY = initialState.centerY;
         state.scale = initialState.scale;
-        state.autoTour = false;
-        state.autoDirection = -1;
         state.anchorX = state.centerX;
         state.anchorY = state.centerY;
+        state.focusIndex = -1;
         updateReadouts();
         renderNow();
       }
 
-      function moveToClassicFocus() {
-        state.centerX = classicFocus.x;
-        state.centerY = classicFocus.y;
-        state.scale = 0.16;
-        state.anchorX = state.centerX;
-        state.anchorY = state.centerY;
+      worker.onmessage = function (event) {
+        var data = event.data;
+        if (data.id !== state.currentJob) return;
+
+        fractalCanvas.width = data.width;
+        fractalCanvas.height = data.height;
+        fractalCtx.putImageData(new ImageData(new Uint8ClampedArray(data.buffer), data.width, data.height), 0, 0);
+        state.rendering = false;
+        state.latestDuration = data.duration;
         updateReadouts();
-        renderNow();
-      }
+        setStatus(classifySample(data.sample), false);
+
+        if (state.queued) {
+          state.queued = false;
+          renderNow();
+        }
+      };
+
+      focusStops.forEach(function (stop, index) {
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "example-btn";
+        button.textContent = stop.label;
+        button.addEventListener("click", function () {
+          stopAutoTour();
+          jumpToFocus(index, true);
+        });
+        focusButtons.appendChild(button);
+        focusButtonNodes.push(button);
+      });
 
       zoomInBtn.addEventListener("click", function () {
-        zoomAt(0.55, state.centerX, state.centerY);
+        stopAutoTour();
+        zoomAt(0.65, state.centerX, state.centerY);
         renderNow();
       });
 
       zoomOutBtn.addEventListener("click", function () {
-        zoomAt(1.8, state.centerX, state.centerY);
+        stopAutoTour();
+        zoomAt(1.6, state.centerX, state.centerY);
         renderNow();
       });
 
       resetBtn.addEventListener("click", resetView);
 
       classicBtn.addEventListener("click", function () {
-        moveToClassicFocus();
+        stopAutoTour();
+        jumpToFocus(state.focusIndex + 1, true);
       });
 
       tourBtn.addEventListener("click", function () {
         state.autoTour = !state.autoTour;
-        if (!state.autoTour) {
-          state.autoDirection = -1;
-        } else {
-          state.anchorX = state.centerX;
-          state.anchorY = state.centerY;
-        }
+        state.tourStart = 0;
+        if (state.autoTour) state.autoTourIndex = state.focusIndex >= 0 ? state.focusIndex : 0;
         updateReadouts();
       });
 
@@ -1042,21 +1135,22 @@
 
       fractalCanvas.addEventListener("wheel", function (event) {
         event.preventDefault();
+        stopAutoTour();
         var point = screenToComplex(event.clientX, event.clientY);
-        var factor = Math.exp(Math.max(-1.2, Math.min(1.2, event.deltaY * 0.0014)));
-        zoomAt(factor, point.x, point.y);
+        var focusPoint = findInterestingAnchor(point.x, point.y);
+        var factor = Math.exp(Math.max(-0.9, Math.min(0.9, event.deltaY * 0.0011)));
+        zoomAt(factor, focusPoint.x, focusPoint.y);
         scheduleRender(10);
       }, { passive: false });
 
       fractalCanvas.addEventListener("pointerdown", function (event) {
-        var start = screenToComplex(event.clientX, event.clientY);
+        stopAutoTour();
         drag = {
           id: event.pointerId,
           startX: event.clientX,
           startY: event.clientY,
           startCenterX: state.centerX,
           startCenterY: state.centerY,
-          startPoint: start,
           moved: false
         };
         fractalCanvas.setPointerCapture(event.pointerId);
@@ -1069,9 +1163,9 @@
         var dy = (event.clientY - drag.startY) / rect.height * state.scale * (rect.height / rect.width);
         state.centerX = drag.startCenterX - dx;
         state.centerY = drag.startCenterY + dy;
-        if (Math.abs(event.clientX - drag.startX) > 4 || Math.abs(event.clientY - drag.startY) > 4) {
-          drag.moved = true;
-        }
+        state.anchorX = state.centerX;
+        state.anchorY = state.centerY;
+        if (Math.abs(event.clientX - drag.startX) > 4 || Math.abs(event.clientY - drag.startY) > 4) drag.moved = true;
         scheduleRender(18);
       });
 
@@ -1079,7 +1173,8 @@
         if (!drag || drag.id !== event.pointerId) return;
         if (!drag.moved) {
           var point = screenToComplex(event.clientX, event.clientY);
-          zoomAt(0.45, point.x, point.y);
+          var focusPoint = findInterestingAnchor(point.x, point.y);
+          zoomAt(0.58, focusPoint.x, focusPoint.y);
         }
         drag = null;
         renderNow();
@@ -1095,30 +1190,34 @@
 
       function animateTour(timestamp) {
         if (state.autoTour) {
-          if (!state.lastTourRender) state.lastTourRender = timestamp;
-          var elapsed = Math.min(60, timestamp - state.lastTourRender);
-          state.lastTourRender = timestamp;
+          if (!state.tourStart) state.tourStart = timestamp;
+          var stop = focusStops[state.autoTourIndex];
+          var t = (timestamp - state.tourStart) / stop.duration;
 
-          var step = state.autoDirection < 0 ? 0.986 : 1.016;
-          var factor = Math.pow(step, elapsed / 16.7);
-          zoomAt(factor, state.anchorX, state.anchorY);
-
-          if (state.scale < 1e-12) state.autoDirection = 1;
-          if (state.scale > initialState.scale) {
-            state.scale = initialState.scale;
-            state.centerX = initialState.centerX;
-            state.centerY = initialState.centerY;
-            state.anchorX = initialState.centerX;
-            state.anchorY = initialState.centerY;
-            state.autoDirection = -1;
+          if (t >= 1) {
+            state.autoTourIndex = (state.autoTourIndex + 1) % focusStops.length;
+            state.focusIndex = state.autoTourIndex;
+            state.tourStart = timestamp;
+            stop = focusStops[state.autoTourIndex];
+            t = 0;
           }
 
+          var eased = 0.5 - 0.5 * Math.cos(Math.PI * Math.max(0, Math.min(1, t)));
+          var ratio = stop.endScale / stop.startScale;
+          state.centerX = stop.x;
+          state.centerY = stop.y;
+          state.anchorX = stop.x;
+          state.anchorY = stop.y;
+          state.scale = stop.startScale * Math.pow(ratio, eased);
+          state.focusIndex = state.autoTourIndex;
+          updateReadouts();
+
           if (!state.rendering && (!animateTour.nextRenderAt || timestamp >= animateTour.nextRenderAt)) {
-            animateTour.nextRenderAt = timestamp + 140;
+            animateTour.nextRenderAt = timestamp + 130;
             renderNow();
           }
         } else {
-          state.lastTourRender = 0;
+          state.tourStart = 0;
           animateTour.nextRenderAt = 0;
         }
 
@@ -1126,6 +1225,7 @@
       }
 
       updateReadouts();
+      jumpToFocus(0, false);
       renderNow();
       requestAnimationFrame(animateTour);
     })();
