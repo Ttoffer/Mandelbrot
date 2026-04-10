@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Mandelbrot" />
+  <meta name="description" content="An interactive introduction to the Mandelbrot Set with zooming fractal explorer, orbit diagrams, and clear explanations." />
+  <title>The Mandelbrot Set | CJF Hal AI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #0f172a;
+      --panel: rgba(15, 23, 42, 0.88);
+      --panel-strong: #10192c;
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #a78bfa;
+      --accent-3: #f59e0b;
+      --success: #34d399;
+      --danger: #fb7185;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at 20% -10%, rgba(56, 189, 248, 0.18), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(167, 139, 250, 0.14), transparent 26%),
+        radial-gradient(circle at 50% 120%, rgba(245, 158, 11, 0.12), transparent 26%),
+        linear-gradient(180deg, #070b14 0%, var(--bg) 35%, #08111d 100%);
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    a:hover {
+      color: #7dd3fc;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 1.2rem));
+      margin: 0 auto;
+      padding: max(1rem, env(safe-area-inset-top)) 0 calc(2.5rem + env(safe-area-inset-bottom));
+    }
+
+    .hero,
+    .card {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.92), rgba(10, 15, 28, 0.9));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 1.1rem;
+      margin-top: 0.9rem;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .brand-logo {
+      width: min(320px, 78vw);
+      border-radius: 14px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .brand-icon {
+      width: clamp(66px, 16vw, 92px);
+      aspect-ratio: 1;
+      border-radius: 22px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #111827;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      font-size: clamp(1.9rem, 4.6vw, 3.15rem);
+      letter-spacing: -0.03em;
+    }
+
+    .hero-subtitle {
+      margin: 0.75rem auto 0;
+      max-width: 820px;
+      text-align: center;
+      color: #cbd5e1;
+      font-size: clamp(1rem, 2.5vw, 1.18rem);
+    }
+
+    .hero-lede {
+      max-width: 920px;
+      margin: 1rem auto 0;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .pill {
+      padding: 0.5rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.08);
+      color: #dbeafe;
+      font-size: 0.92rem;
+    }
+
+    main {
+      margin-top: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .card {
+      padding: 1rem;
+    }
+
+    h2 {
+      margin: 0 0 0.65rem;
+      color: #e0f2fe;
+      font-size: clamp(1.28rem, 2.8vw, 1.7rem);
+    }
+
+    h3 {
+      margin: 0 0 0.55rem;
+      color: #cbd5e1;
+      font-size: 1.02rem;
+    }
+
+    p {
+      margin: 0.65rem 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .math {
+      font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+      font-size: 1.05em;
+    }
+
+    .equation {
+      margin: 0.9rem 0;
+      padding: 0.9rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.11), rgba(56, 189, 248, 0.05));
+      text-align: center;
+      font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+      color: #f8fafc;
+    }
+
+    .explorer-card {
+      padding: 1rem;
+    }
+
+    .explorer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #d1fae5;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 0.22rem rgba(52, 211, 153, 0.18);
+    }
+
+    .fractal-stage {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #050812;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      aspect-ratio: 16 / 10;
+      min-height: 260px;
+      touch-action: none;
+    }
+
+    #fractalCanvas,
+    #orbitCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #050812;
+    }
+
+    .overlay-note {
+      position: absolute;
+      left: 0.9rem;
+      right: 0.9rem;
+      bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      pointer-events: none;
+    }
+
+    .overlay-chip {
+      padding: 0.34rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(2, 6, 23, 0.76);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #dbeafe;
+      font-size: 0.78rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .control-row,
+    .stats-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 0.85rem;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.18), rgba(56, 189, 248, 0.1));
+      color: #e0f2fe;
+      border-radius: 12px;
+      padding: 0.66rem 0.9rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 44px;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(125, 211, 252, 0.8);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.28), rgba(56, 189, 248, 0.15));
+    }
+
+    .btn:focus-visible,
+    input:focus-visible {
+      outline: 2px solid #7dd3fc;
+      outline-offset: 2px;
+    }
+
+    .btn-muted {
+      border-color: rgba(148, 163, 184, 0.3);
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--text);
+    }
+
+    .btn-active {
+      border-color: rgba(245, 158, 11, 0.7);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.12));
+      color: #fef3c7;
+    }
+
+    .range-wrap {
+      display: grid;
+      gap: 0.35rem;
+      min-width: min(100%, 320px);
+      flex: 1 1 220px;
+    }
+
+    .range-wrap label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.7rem;
+      width: 100%;
+      margin-top: 0.9rem;
+    }
+
+    .stat {
+      padding: 0.8rem;
+      border-radius: 14px;
+      background: rgba(2, 6, 23, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 0.28rem;
+      font-size: 0.98rem;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: #f8fafc;
+      word-break: break-word;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .diagram {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(2, 6, 23, 0.5);
+    }
+
+    .figure-note {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .flow-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .legend-bar {
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #050812 0%, #0ea5e9 18%, #8b5cf6 40%, #f97316 67%, #fde047 85%, #ffffff 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin: 0.85rem 0 0.4rem;
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .bullet-list,
+    .number-list {
+      padding-left: 1.15rem;
+      color: var(--muted);
+    }
+
+    .bullet-list li,
+    .number-list li {
+      margin: 0.35rem 0;
+    }
+
+    .example-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .example-btn {
+      min-height: 42px;
+      padding: 0.55rem 0.78rem;
+      border-radius: 999px;
+      border: 1px solid rgba(167, 139, 250, 0.28);
+      background: rgba(167, 139, 250, 0.12);
+      color: #ede9fe;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .example-btn:hover,
+    .example-btn.is-selected {
+      border-color: rgba(167, 139, 250, 0.76);
+      background: rgba(167, 139, 250, 0.22);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .fact-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .fact {
+      padding: 0.95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(2, 6, 23, 0.38);
+    }
+
+    .fact strong {
+      display: block;
+      margin-bottom: 0.45rem;
+      color: #f8fafc;
+    }
+
+    footer {
+      margin-top: 1rem;
+      padding: 1.1rem 1rem 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .grid,
+      .two-col,
+      .fact-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        width: min(100% - 0.8rem, 1180px);
+      }
+
+      .hero,
+      .card,
+      .explorer-card {
+        padding: 0.9rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-row {
+        gap: 0.55rem;
+      }
+
+      .btn {
+        flex: 1 1 calc(50% - 0.55rem);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand-row">
+        <img src="header-logo.svg" alt="CJF Hal AI" class="brand-logo" width="320" height="88" decoding="async" />
+        <img src="apple-touch-icon.png" alt="Mandelbrot Apple touch icon" class="brand-icon" width="180" height="180" decoding="async" />
+      </div>
+      <h1>The Mandelbrot Set</h1>
+      <p class="hero-subtitle">
+        A simple rule on complex numbers produces one of the most famous images in mathematics.
+      </p>
+      <p class="hero-lede">
+        You are exactly right about the basic idea: each point stands for a complex number <span class="math">c</span>, we iterate
+        <span class="math">z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span>, and the colours show how quickly the orbit escapes to infinity or how long it appears to stay bounded.
+      </p>
+      <div class="pill-row" aria-label="Highlights">
+        <span class="pill">Interactive zoom explorer</span>
+        <span class="pill">Touch-friendly for iPhone and iPad</span>
+        <span class="pill">Orbit diagram for a chosen point</span>
+        <span class="pill">Clear explanation of the maths</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="card explorer-card" aria-labelledby="explorer-title">
+        <div class="explorer-head">
+          <div>
+            <h2 id="explorer-title">Interactive Mandelbrot Explorer</h2>
+            <p class="muted" style="margin-top:0">
+              Tap or click to zoom in at a point. Drag to pan. Mouse wheel also zooms on PC. Use the tour to keep zooming in and out automatically.
+            </p>
+          </div>
+          <div class="status-badge" id="renderStatusBadge">
+            <span class="status-dot" id="renderStatusDot"></span>
+            <span id="renderStatusText">Ready</span>
+          </div>
+        </div>
+
+        <div class="fractal-stage">
+          <canvas id="fractalCanvas" aria-label="Interactive Mandelbrot Set explorer"></canvas>
+          <div class="overlay-note" aria-hidden="true">
+            <span class="overlay-chip">Inside the set: dark</span>
+            <span class="overlay-chip">Outside: coloured by escape speed</span>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <button type="button" class="btn" id="zoomInBtn">Zoom +</button>
+          <button type="button" class="btn" id="zoomOutBtn">Zoom -</button>
+          <button type="button" class="btn btn-muted" id="resetBtn">Reset</button>
+          <button type="button" class="btn btn-muted" id="tourBtn">Auto Tour</button>
+          <button type="button" class="btn btn-muted" id="classicBtn">Classic Focus</button>
+          <div class="range-wrap">
+            <label for="detailSlider">
+              <span>Extra detail</span>
+              <span id="detailReadout">140 iterations base</span>
+            </label>
+            <input id="detailSlider" type="range" min="80" max="420" step="10" value="140" />
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="stat-label">Centre</span>
+            <span class="stat-value" id="centreReadout">-0.500000000000 + 0.000000000000i</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">View Width</span>
+            <span class="stat-value" id="scaleReadout">3.200000000000</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Iterations</span>
+            <span class="stat-value" id="iterReadout">140</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Last Render</span>
+            <span class="stat-value" id="timeReadout">-</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" style="margin-top:1rem">
+        <article class="card">
+          <h2>What the Mandelbrot Set is</h2>
+          <p>
+            The Mandelbrot Set is the collection of all complex numbers <span class="math">c</span> for which the repeated process
+            <span class="math">z<sub>0</sub> = 0</span>,
+            <span class="math">z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span>
+            does <strong>not</strong> run away to infinity.
+          </p>
+          <div class="equation">
+            <span class="math">z<sub>0</sub> = 0, &nbsp; z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span>
+          </div>
+          <p>
+            Each pixel in the image corresponds to one value of <span class="math">c = a + bi</span> on the complex plane. We test that pixel by starting at zero and applying the same rule again and again.
+          </p>
+          <ol class="number-list">
+            <li>Choose a point <span class="math">c</span> in the complex plane.</li>
+            <li>Start with <span class="math">z = 0</span>.</li>
+            <li>Replace <span class="math">z</span> by <span class="math">z<sup>2</sup> + c</span>.</li>
+            <li>If <span class="math">|z|</span> grows beyond 2, it will escape forever.</li>
+            <li>If it stays bounded for many steps, the point is in or very near the Mandelbrot Set.</li>
+          </ol>
+          <p class="muted">
+            In practical computer graphics we only test a finite number of steps, so boundary points are approximated. That is why more iterations reveal finer detail.
+          </p>
+        </article>
+
+        <aside class="card">
+          <h2>Bounded vs unbounded</h2>
+          <p>
+            Your description is correct. The black interior corresponds to points whose orbits appear bounded. The bright bands outside show points that escape, coloured by <em>how quickly</em> they escape.
+          </p>
+          <div class="legend-bar" aria-hidden="true"></div>
+          <div class="legend-labels" aria-hidden="true">
+            <span>Slow escape</span>
+            <span>Faster escape</span>
+          </div>
+          <ul class="bullet-list">
+            <li><strong>Inside:</strong> bounded or very likely bounded after many checks.</li>
+            <li><strong>Outside:</strong> unbounded - the orbit eventually shoots away.</li>
+            <li><strong>Boundary:</strong> extremely delicate; tiny changes in <span class="math">c</span> can completely change the behaviour.</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="mini-grid">
+        <article class="card">
+          <h2>How the image is generated</h2>
+          <div class="diagram">
+            <svg class="flow-svg" viewBox="0 0 800 320" role="img" aria-label="Flow diagram for generating the Mandelbrot Set image">
+              <defs>
+                <linearGradient id="flowBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0f172a"/>
+                  <stop offset="100%" stop-color="#111827"/>
+                </linearGradient>
+                <linearGradient id="flowStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="100%" stop-color="#a78bfa"/>
+                </linearGradient>
+              </defs>
+              <rect width="800" height="320" fill="url(#flowBg)"/>
+              <rect x="36" y="76" width="150" height="110" rx="20" fill="#132033" stroke="url(#flowStroke)"/>
+              <rect x="244" y="76" width="150" height="110" rx="20" fill="#132033" stroke="url(#flowStroke)"/>
+              <rect x="452" y="76" width="150" height="110" rx="20" fill="#132033" stroke="url(#flowStroke)"/>
+              <rect x="614" y="56" width="150" height="70" rx="20" fill="#12243a" stroke="#34d399"/>
+              <rect x="614" y="144" width="150" height="70" rx="20" fill="#2b1620" stroke="#fb7185"/>
+              <path d="M186 131H244M394 131H452M602 110H614M602 166H614" stroke="#7dd3fc" stroke-width="4" stroke-linecap="round"/>
+              <path d="M602 131C628 131 628 179 602 179" fill="none" stroke="#f8fafc" stroke-width="3" stroke-dasharray="8 8"/>
+              <text x="111" y="116" fill="#e2e8f0" text-anchor="middle" font-size="26" font-family="Segoe UI, sans-serif">Choose</text>
+              <text x="111" y="148" fill="#e2e8f0" text-anchor="middle" font-size="26" font-family="Segoe UI, sans-serif">pixel / c</text>
+              <text x="319" y="108" fill="#e2e8f0" text-anchor="middle" font-size="26" font-family="Segoe UI, sans-serif">Iterate</text>
+              <text x="319" y="142" fill="#e2e8f0" text-anchor="middle" font-size="24" font-family="Cambria Math, serif">z = z^2 + c</text>
+              <text x="527" y="108" fill="#e2e8f0" text-anchor="middle" font-size="26" font-family="Segoe UI, sans-serif">Check</text>
+              <text x="527" y="142" fill="#e2e8f0" text-anchor="middle" font-size="23" font-family="Cambria Math, serif">|z| &gt; 2 ?</text>
+              <text x="689" y="98" fill="#d1fae5" text-anchor="middle" font-size="22" font-family="Segoe UI, sans-serif">Yes:</text>
+              <text x="689" y="122" fill="#d1fae5" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">colour by</text>
+              <text x="689" y="146" fill="#d1fae5" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">escape speed</text>
+              <text x="689" y="186" fill="#fecdd3" text-anchor="middle" font-size="22" font-family="Segoe UI, sans-serif">No:</text>
+              <text x="689" y="210" fill="#fecdd3" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">keep iterating</text>
+              <text x="689" y="234" fill="#fecdd3" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">or mark inside</text>
+            </svg>
+          </div>
+          <p class="figure-note">
+            The computer repeats this test for every pixel. The famous shape appears because the boundary between stable and unstable behaviour is extraordinarily intricate.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Orbit diagram for one point</h2>
+          <p>
+            This panel shows the actual orbit of a chosen complex number <span class="math">c</span>. It is the same calculation as the big image, but now you can watch the sequence point by point.
+          </p>
+          <div class="fractal-stage" style="aspect-ratio: 1 / 1; min-height: 280px;">
+            <canvas id="orbitCanvas" aria-label="Orbit diagram for a selected complex number"></canvas>
+          </div>
+          <div class="example-row" id="orbitExamples" aria-label="Example orbit points"></div>
+          <p class="figure-note" id="orbitReadout">
+            Select an example to see whether the orbit stays bounded or escapes.
+          </p>
+        </article>
+      </section>
+
+      <section class="two-col">
+        <article class="card">
+          <h2>Why the zoom feels endless</h2>
+          <p>
+            The boundary of the Mandelbrot Set is not a smooth curve. It contains structure at every scale, so when you zoom in you keep finding spirals, bulbs, filaments, and miniature Mandelbrot copies.
+          </p>
+          <p>
+            It is not exact self-similarity in the simple way a snowflake pattern might repeat. Instead it has an endless supply of new detail produced by the same rule applied at finer and finer scales.
+          </p>
+          <p class="muted">
+            This page can zoom very deeply for an in-browser demo, but any computer eventually hits finite precision. The mathematics does not stop - only the numerical approximation does.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Why it matters in maths</h2>
+          <ul class="bullet-list">
+            <li><strong>Complex dynamics:</strong> it is a central object in studying repeated functions.</li>
+            <li><strong>Julia sets:</strong> each value of <span class="math">c</span> has a related Julia set, and the Mandelbrot Set organises which Julia sets are connected.</li>
+            <li><strong>Chaos and stability:</strong> it shows how tiny changes in input can cause huge qualitative changes in long-term behaviour.</li>
+            <li><strong>Computation and visualisation:</strong> it is a classic example of mathematics becoming visible through algorithms.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Three useful ways to think about it</h2>
+        <div class="fact-cards">
+          <div class="fact">
+            <strong>1. A set of numbers</strong>
+            It is literally a set of complex numbers <span class="math">c</span> satisfying a boundedness condition.
+          </div>
+          <div class="fact">
+            <strong>2. A stability map</strong>
+            The picture marks which parameters lead to stable iteration and which lead to escape.
+          </div>
+          <div class="fact">
+            <strong>3. A geometric object</strong>
+            The algebra creates a striking boundary with rich geometry and deep links to other branches of maths.
+          </div>
+        </div>
+
+        <footer>
+          Built for <strong>CJF Hal AI</strong>. Files in this folder include <code>index.html</code>, <code>header-logo.svg</code>, <code>favicon.svg</code>, and <code>apple-touch-icon.png</code> for iPhone and iPad home-screen use.
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var fractalCanvas = document.getElementById("fractalCanvas");
+      var fractalCtx = fractalCanvas.getContext("2d", { alpha: false });
+      var zoomInBtn = document.getElementById("zoomInBtn");
+      var zoomOutBtn = document.getElementById("zoomOutBtn");
+      var resetBtn = document.getElementById("resetBtn");
+      var tourBtn = document.getElementById("tourBtn");
+      var classicBtn = document.getElementById("classicBtn");
+      var detailSlider = document.getElementById("detailSlider");
+      var detailReadout = document.getElementById("detailReadout");
+      var centreReadout = document.getElementById("centreReadout");
+      var scaleReadout = document.getElementById("scaleReadout");
+      var iterReadout = document.getElementById("iterReadout");
+      var timeReadout = document.getElementById("timeReadout");
+      var renderStatusText = document.getElementById("renderStatusText");
+      var renderStatusDot = document.getElementById("renderStatusDot");
+
+      var initialState = {
+        centerX: -0.5,
+        centerY: 0,
+        scale: 3.2,
+        baseIter: 140
+      };
+
+      var state = {
+        centerX: initialState.centerX,
+        centerY: initialState.centerY,
+        scale: initialState.scale,
+        baseIter: initialState.baseIter,
+        rendering: false,
+        queued: false,
+        currentJob: 0,
+        latestDuration: 0,
+        autoTour: false,
+        autoDirection: -1,
+        anchorX: initialState.centerX,
+        anchorY: initialState.centerY,
+        renderTimer: null,
+        lastTourRender: 0
+      };
+
+      var drag = null;
+      var classicFocus = { x: -0.743643887037151, y: 0.13182590420533 };
+
+      function createWorker() {
+        var workerSource = [
+          "self.onmessage = function (event) {",
+          "  var data = event.data;",
+          "  var width = data.width;",
+          "  var height = data.height;",
+          "  var buffer = new Uint8ClampedArray(width * height * 4);",
+          "  var cx = data.centerX;",
+          "  var cy = data.centerY;",
+          "  var scale = data.scale;",
+          "  var maxIter = data.maxIter;",
+          "  var aspect = height / width;",
+          "  var start = Date.now();",
+          "  function palette(t) {",
+          "    var r = Math.floor(128 + 127 * Math.cos(6.28318 * (t + 0.02)));",
+          "    var g = Math.floor(128 + 127 * Math.cos(6.28318 * (t + 0.28)));",
+          "    var b = Math.floor(128 + 127 * Math.cos(6.28318 * (t + 0.54)));",
+          "    return [r, g, b];",
+          "  }",
+          "  for (var py = 0; py < height; py++) {",
+          "    var imag = cy + ((py / height) - 0.5) * scale * aspect;",
+          "    for (var px = 0; px < width; px++) {",
+          "      var real = cx + ((px / width) - 0.5) * scale;",
+          "      var zx = 0;",
+          "      var zy = 0;",
+          "      var iter = 0;",
+          "      while (zx * zx + zy * zy <= 4 && iter < maxIter) {",
+          "        var x2 = zx * zx - zy * zy + real;",
+          "        var y2 = 2 * zx * zy + imag;",
+          "        zx = x2;",
+          "        zy = y2;",
+          "        iter++;",
+          "      }",
+          "      var idx = (py * width + px) * 4;",
+          "      if (iter >= maxIter) {",
+          "        buffer[idx] = 3;",
+          "        buffer[idx + 1] = 6;",
+          "        buffer[idx + 2] = 14;",
+          "        buffer[idx + 3] = 255;",
+          "      } else {",
+          "        var mag = Math.sqrt(zx * zx + zy * zy);",
+          "        var smooth = iter;",
+          "        if (mag > 0) {",
+          "          smooth = iter + 1 - Math.log(Math.log(mag)) / Math.log(2);",
+          "        }",
+          "        var t = smooth / maxIter;",
+          "        var rgb = palette(Math.max(0, Math.min(1, t)));",
+          "        buffer[idx] = rgb[0];",
+          "        buffer[idx + 1] = rgb[1];",
+          "        buffer[idx + 2] = rgb[2];",
+          "        buffer[idx + 3] = 255;",
+          "      }",
+          "    }",
+          "  }",
+          "  self.postMessage({",
+          "    id: data.id,",
+          "    width: width,",
+          "    height: height,",
+          "    duration: Date.now() - start,",
+          "    buffer: buffer.buffer",
+          "  }, [buffer.buffer]);",
+          "};"
+        ].join("\n");
+
+        return new Worker(URL.createObjectURL(new Blob([workerSource], { type: "text/javascript" })));
+      }
+
+      var worker = createWorker();
+
+      worker.onmessage = function (event) {
+        var data = event.data;
+        if (data.id !== state.currentJob) return;
+
+        fractalCanvas.width = data.width;
+        fractalCanvas.height = data.height;
+        fractalCtx.putImageData(new ImageData(new Uint8ClampedArray(data.buffer), data.width, data.height), 0, 0);
+        state.rendering = false;
+        state.latestDuration = data.duration;
+        updateReadouts();
+        setStatus("Ready", false);
+
+        if (state.queued) {
+          state.queued = false;
+          renderNow();
+        }
+      };
+
+      function setStatus(text, busy) {
+        renderStatusText.textContent = text;
+        renderStatusDot.style.background = busy ? "#f59e0b" : "#34d399";
+        renderStatusDot.style.boxShadow = busy
+          ? "0 0 0 0.22rem rgba(245, 158, 11, 0.18)"
+          : "0 0 0 0.22rem rgba(52, 211, 153, 0.18)";
+      }
+
+      function effectiveIterations() {
+        var ratio = Math.max(1, initialState.scale / state.scale);
+        var zoomDepth = Math.log(ratio) / Math.LN10;
+        return Math.max(50, Math.round(state.baseIter + zoomDepth * 46));
+      }
+
+      function updateReadouts() {
+        centreReadout.textContent = formatComplex(state.centerX, state.centerY);
+        scaleReadout.textContent = formatNumber(state.scale);
+        iterReadout.textContent = String(effectiveIterations());
+        timeReadout.textContent = state.latestDuration ? state.latestDuration + " ms" : "-";
+        detailReadout.textContent = state.baseIter + " iterations base";
+        tourBtn.classList.toggle("btn-active", state.autoTour);
+        tourBtn.textContent = state.autoTour ? "Stop Tour" : "Auto Tour";
+      }
+
+      function formatNumber(value) {
+        if (Math.abs(value) >= 0.001 && Math.abs(value) < 1000) {
+          return value.toFixed(12);
+        }
+        return value.toExponential(6);
+      }
+
+      function formatComplex(x, y) {
+        var sign = y >= 0 ? "+" : "-";
+        return formatNumber(x) + " " + sign + " " + formatNumber(Math.abs(y)) + "i";
+      }
+
+      function scheduleRender(delay) {
+        clearTimeout(state.renderTimer);
+        state.renderTimer = setTimeout(renderNow, delay);
+      }
+
+      function renderNow() {
+        clearTimeout(state.renderTimer);
+        if (state.rendering) {
+          state.queued = true;
+          return;
+        }
+
+        var rect = fractalCanvas.getBoundingClientRect();
+        var cssWidth = Math.max(280, Math.round(rect.width || fractalCanvas.parentElement.clientWidth || 800));
+        var cssHeight = Math.max(220, Math.round(rect.height || fractalCanvas.parentElement.clientHeight || 500));
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var quality = cssWidth <= 480 ? 0.95 : 1.1;
+        var renderWidth = Math.max(320, Math.round(cssWidth * dpr * quality));
+        var renderHeight = Math.max(200, Math.round(cssHeight * dpr * quality));
+
+        state.rendering = true;
+        state.currentJob += 1;
+        setStatus("Rendering...", true);
+        updateReadouts();
+        worker.postMessage({
+          id: state.currentJob,
+          width: renderWidth,
+          height: renderHeight,
+          centerX: state.centerX,
+          centerY: state.centerY,
+          scale: state.scale,
+          maxIter: effectiveIterations()
+        });
+      }
+
+      function zoomAt(factor, anchorX, anchorY) {
+        state.centerX = anchorX + (state.centerX - anchorX) * factor;
+        state.centerY = anchorY + (state.centerY - anchorY) * factor;
+        state.scale *= factor;
+        state.anchorX = anchorX;
+        state.anchorY = anchorY;
+        updateReadouts();
+      }
+
+      function screenToComplex(clientX, clientY) {
+        var rect = fractalCanvas.getBoundingClientRect();
+        var nx = (clientX - rect.left) / rect.width - 0.5;
+        var ny = (clientY - rect.top) / rect.height - 0.5;
+        return {
+          x: state.centerX + nx * state.scale,
+          y: state.centerY + ny * state.scale * (rect.height / rect.width)
+        };
+      }
+
+      function resetView() {
+        state.centerX = initialState.centerX;
+        state.centerY = initialState.centerY;
+        state.scale = initialState.scale;
+        state.autoTour = false;
+        state.autoDirection = -1;
+        state.anchorX = state.centerX;
+        state.anchorY = state.centerY;
+        updateReadouts();
+        renderNow();
+      }
+
+      function moveToClassicFocus() {
+        state.centerX = classicFocus.x;
+        state.centerY = classicFocus.y;
+        state.scale = 0.16;
+        state.anchorX = state.centerX;
+        state.anchorY = state.centerY;
+        updateReadouts();
+        renderNow();
+      }
+
+      zoomInBtn.addEventListener("click", function () {
+        zoomAt(0.55, state.centerX, state.centerY);
+        renderNow();
+      });
+
+      zoomOutBtn.addEventListener("click", function () {
+        zoomAt(1.8, state.centerX, state.centerY);
+        renderNow();
+      });
+
+      resetBtn.addEventListener("click", resetView);
+
+      classicBtn.addEventListener("click", function () {
+        moveToClassicFocus();
+      });
+
+      tourBtn.addEventListener("click", function () {
+        state.autoTour = !state.autoTour;
+        if (!state.autoTour) {
+          state.autoDirection = -1;
+        } else {
+          state.anchorX = state.centerX;
+          state.anchorY = state.centerY;
+        }
+        updateReadouts();
+      });
+
+      detailSlider.addEventListener("input", function () {
+        state.baseIter = parseInt(detailSlider.value, 10) || initialState.baseIter;
+        updateReadouts();
+        scheduleRender(80);
+      });
+
+      fractalCanvas.addEventListener("wheel", function (event) {
+        event.preventDefault();
+        var point = screenToComplex(event.clientX, event.clientY);
+        var factor = Math.exp(Math.max(-1.2, Math.min(1.2, event.deltaY * 0.0014)));
+        zoomAt(factor, point.x, point.y);
+        scheduleRender(10);
+      }, { passive: false });
+
+      fractalCanvas.addEventListener("pointerdown", function (event) {
+        var start = screenToComplex(event.clientX, event.clientY);
+        drag = {
+          id: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startCenterX: state.centerX,
+          startCenterY: state.centerY,
+          startPoint: start,
+          moved: false
+        };
+        fractalCanvas.setPointerCapture(event.pointerId);
+      });
+
+      fractalCanvas.addEventListener("pointermove", function (event) {
+        if (!drag || drag.id !== event.pointerId) return;
+        var rect = fractalCanvas.getBoundingClientRect();
+        var dx = (event.clientX - drag.startX) / rect.width * state.scale;
+        var dy = (event.clientY - drag.startY) / rect.height * state.scale * (rect.height / rect.width);
+        state.centerX = drag.startCenterX - dx;
+        state.centerY = drag.startCenterY + dy;
+        if (Math.abs(event.clientX - drag.startX) > 4 || Math.abs(event.clientY - drag.startY) > 4) {
+          drag.moved = true;
+        }
+        scheduleRender(18);
+      });
+
+      fractalCanvas.addEventListener("pointerup", function (event) {
+        if (!drag || drag.id !== event.pointerId) return;
+        if (!drag.moved) {
+          var point = screenToComplex(event.clientX, event.clientY);
+          zoomAt(0.45, point.x, point.y);
+        }
+        drag = null;
+        renderNow();
+      });
+
+      fractalCanvas.addEventListener("pointercancel", function () {
+        drag = null;
+      });
+
+      window.addEventListener("resize", function () {
+        scheduleRender(70);
+      });
+
+      function animateTour(timestamp) {
+        if (state.autoTour) {
+          if (!state.lastTourRender) state.lastTourRender = timestamp;
+          var elapsed = Math.min(60, timestamp - state.lastTourRender);
+          state.lastTourRender = timestamp;
+
+          var step = state.autoDirection < 0 ? 0.986 : 1.016;
+          var factor = Math.pow(step, elapsed / 16.7);
+          zoomAt(factor, state.anchorX, state.anchorY);
+
+          if (state.scale < 1e-12) state.autoDirection = 1;
+          if (state.scale > initialState.scale) {
+            state.scale = initialState.scale;
+            state.centerX = initialState.centerX;
+            state.centerY = initialState.centerY;
+            state.anchorX = initialState.centerX;
+            state.anchorY = initialState.centerY;
+            state.autoDirection = -1;
+          }
+
+          if (!state.rendering && (!animateTour.nextRenderAt || timestamp >= animateTour.nextRenderAt)) {
+            animateTour.nextRenderAt = timestamp + 140;
+            renderNow();
+          }
+        } else {
+          state.lastTourRender = 0;
+          animateTour.nextRenderAt = 0;
+        }
+
+        requestAnimationFrame(animateTour);
+      }
+
+      updateReadouts();
+      renderNow();
+      requestAnimationFrame(animateTour);
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var orbitCanvas = document.getElementById("orbitCanvas");
+      var ctx = orbitCanvas.getContext("2d");
+      var orbitReadout = document.getElementById("orbitReadout");
+      var examplesWrap = document.getElementById("orbitExamples");
+      var examples = [
+        { id: "inside", label: "Inside: -1 + 0i", re: -1, im: 0 },
+        { id: "outside", label: "Outside: 0.4 + 0.3i", re: 0.4, im: 0.3 },
+        { id: "boundary", label: "Near boundary: -0.75 + 0.1i", re: -0.75, im: 0.1 },
+        { id: "spiral", label: "Spiral: 0.285 + 0.01i", re: 0.285, im: 0.01 }
+      ];
+      var selected = examples[0];
+
+      function resizeCanvas() {
+        var rect = orbitCanvas.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        orbitCanvas.width = Math.max(260, Math.round(rect.width * dpr));
+        orbitCanvas.height = Math.max(260, Math.round(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function toPx(x, min, max, size) {
+        return ((x - min) / (max - min)) * size;
+      }
+
+      function computeOrbit(re, im, limit) {
+        var path = [{ x: 0, y: 0 }];
+        var zx = 0;
+        var zy = 0;
+        var escapedAt = null;
+        for (var i = 0; i < limit; i++) {
+          var nextX = zx * zx - zy * zy + re;
+          var nextY = 2 * zx * zy + im;
+          zx = nextX;
+          zy = nextY;
+          path.push({ x: zx, y: zy });
+          if (zx * zx + zy * zy > 4) {
+            escapedAt = i + 1;
+            break;
+          }
+        }
+        return { path: path, escapedAt: escapedAt };
+      }
+
+      function drawOrbit() {
+        var w = orbitCanvas.clientWidth;
+        var h = orbitCanvas.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#050812";
+        ctx.fillRect(0, 0, w, h);
+
+        var min = -2.2;
+        var max = 2.2;
+        var originX = toPx(0, min, max, w);
+        var originY = h - toPx(0, min, max, h);
+
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.22)";
+        ctx.lineWidth = 1;
+        for (var g = -2; g <= 2; g++) {
+          var gx = toPx(g, min, max, w);
+          var gy = h - toPx(g, min, max, h);
+          ctx.beginPath();
+          ctx.moveTo(gx, 0);
+          ctx.lineTo(gx, h);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, gy);
+          ctx.lineTo(w, gy);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = "rgba(248, 250, 252, 0.45)";
+        ctx.beginPath();
+        ctx.moveTo(originX, 0);
+        ctx.lineTo(originX, h);
+        ctx.moveTo(0, originY);
+        ctx.lineTo(w, originY);
+        ctx.stroke();
+
+        var escapeRadiusPx = Math.abs(toPx(2, min, max, Math.min(w, h)) - toPx(0, min, max, Math.min(w, h)));
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.22)";
+        ctx.beginPath();
+        ctx.arc(originX, originY, escapeRadiusPx, 0, Math.PI * 2);
+        ctx.stroke();
+
+        var orbit = computeOrbit(selected.re, selected.im, 40);
+        var pts = orbit.path;
+
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.85)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (var i = 0; i < pts.length; i++) {
+          var px = toPx(pts[i].x, min, max, w);
+          var py = h - toPx(pts[i].y, min, max, h);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        for (var j = 0; j < pts.length; j++) {
+          var x = toPx(pts[j].x, min, max, w);
+          var y = h - toPx(pts[j].y, min, max, h);
+          ctx.fillStyle = j === 0 ? "#22d3ee" : "#f59e0b";
+          ctx.beginPath();
+          ctx.arc(x, y, j === 0 ? 5 : 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        var cpx = toPx(selected.re, min, max, w);
+        var cpy = h - toPx(selected.im, min, max, h);
+        ctx.fillStyle = "#34d399";
+        ctx.beginPath();
+        ctx.arc(cpx, cpy, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.fillText("c", cpx + 8, cpy - 8);
+        ctx.fillStyle = "#22d3ee";
+        ctx.fillText("z0", toPx(0, min, max, w) + 8, h - toPx(0, min, max, h) - 8);
+
+        if (orbit.escapedAt) {
+          orbitReadout.innerHTML =
+            "For <span class='math'>c = " + selected.re + (selected.im >= 0 ? " + " : " - ") + Math.abs(selected.im) +
+            "i</span>, the orbit escapes after <strong>" + orbit.escapedAt + "</strong> iterations, so the point is outside the Mandelbrot Set.";
+        } else {
+          orbitReadout.innerHTML =
+            "For <span class='math'>c = " + selected.re + (selected.im >= 0 ? " + " : " - ") + Math.abs(selected.im) +
+            "i</span>, the orbit stayed bounded for the first <strong>40</strong> iterations, so the point is inside or extremely close to the boundary.";
+        }
+      }
+
+      examples.forEach(function (example, index) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "example-btn";
+        btn.textContent = example.label;
+        if (index === 0) btn.classList.add("is-selected");
+        btn.addEventListener("click", function () {
+          selected = example;
+          Array.prototype.forEach.call(examplesWrap.children, function (child) {
+            child.classList.remove("is-selected");
+          });
+          btn.classList.add("is-selected");
+          drawOrbit();
+        });
+        examplesWrap.appendChild(btn);
+      });
+
+      window.addEventListener("resize", function () {
+        resizeCanvas();
+        drawOrbit();
+      });
+
+      resizeCanvas();
+      drawOrbit();
+    })();
+  </script>
+</body>
+</html>
