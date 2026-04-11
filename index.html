@@ -397,6 +397,47 @@
       font-size: 0.9rem;
     }
 
+    .steps-panel {
+      margin-top: 0.9rem;
+      padding: 0.9rem;
+      border-radius: 16px;
+      background: rgba(2, 6, 23, 0.42);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .step-list {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .step-item {
+      padding: 0.6rem 0.75rem;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.74);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: #dbeafe;
+    }
+
+    .step-item strong {
+      color: #f8fafc;
+    }
+
+    .step-item--escape {
+      border-color: rgba(251, 146, 60, 0.45);
+      background: rgba(154, 52, 18, 0.18);
+    }
+
+    .step-item--inside {
+      border-color: rgba(52, 211, 153, 0.32);
+      background: rgba(5, 46, 22, 0.18);
+    }
+
     .flow-svg {
       width: 100%;
       height: auto;
@@ -628,6 +669,9 @@
           <p>
             Each pixel in the image corresponds to one value of <span class="math">c = a + bi</span> on the complex plane. We test that pixel by starting at zero and applying the same rule again and again.
           </p>
+          <p>
+            An adjacent pixel is tested by exactly the same procedure, but with a slightly different value of <span class="math">c</span> determined by its neighbouring screen position. In the Mandelbrot Set the starting value is always <span class="math">z<sub>0</sub> = 0</span>; what changes from pixel to pixel is the parameter <span class="math">c</span>, not the initial value of <span class="math">z</span>.
+          </p>
           <ol class="number-list">
             <li>Choose a point <span class="math">c</span> in the complex plane.</li>
             <li>Start with <span class="math">z = 0</span>.</li>
@@ -687,10 +731,10 @@
               <text x="319" y="142" fill="#e2e8f0" text-anchor="middle" font-size="24" font-family="Cambria Math, serif">z = z^2 + c</text>
               <text x="527" y="108" fill="#e2e8f0" text-anchor="middle" font-size="26" font-family="Segoe UI, sans-serif">Check</text>
               <text x="527" y="142" fill="#e2e8f0" text-anchor="middle" font-size="23" font-family="Cambria Math, serif">|z| &gt; 2 ?</text>
-              <text x="689" y="98" fill="#d1fae5" text-anchor="middle" font-size="22" font-family="Segoe UI, sans-serif">Yes:</text>
+              <text x="689" y="98" fill="#d1fae5" text-anchor="middle" font-size="22" font-family="Segoe UI, sans-serif">Escape:</text>
               <text x="689" y="122" fill="#d1fae5" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">colour by</text>
               <text x="689" y="146" fill="#d1fae5" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">escape speed</text>
-              <text x="689" y="186" fill="#fecdd3" text-anchor="middle" font-size="22" font-family="Segoe UI, sans-serif">No:</text>
+              <text x="689" y="186" fill="#fecdd3" text-anchor="middle" font-size="22" font-family="Segoe UI, sans-serif">Continue:</text>
               <text x="689" y="210" fill="#fecdd3" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">keep iterating</text>
               <text x="689" y="234" fill="#fecdd3" text-anchor="middle" font-size="21" font-family="Segoe UI, sans-serif">or mark inside</text>
             </svg>
@@ -698,19 +742,121 @@
           <p class="figure-note">
             The computation is repeated for every pixel. The resulting shape is governed by the extraordinarily intricate boundary between stable and unstable behaviour.
           </p>
+          <p>
+            An adjacent pixel is tested by exactly the same procedure, but with a slightly different value of <span class="math">c</span>. The complex plane, often called the <strong>Argand plane</strong>, may be viewed as a coordinate plane: the horizontal axis gives the real part and the vertical axis gives the imaginary part. In that sense it is helpful to think of the image as a map. Adjacent pixels correspond to adjacent coordinates, so each neighbouring pixel represents a nearby complex number.
+          </p>
+          <p>
+            For the Mandelbrot Set the starting value is always <span class="math">z<sub>0</sub> = 0</span>. What changes from pixel to pixel is not the initial value of <span class="math">z</span>, but the parameter <span class="math">c</span>. If one pixel corresponds to
+            <span class="math">c = -0.7500 + 0.1000i</span>, then a neighbouring pixel might correspond to
+            <span class="math">c = -0.7497 + 0.1000i</span> or
+            <span class="math">c = -0.7500 + 0.0997i</span>, depending on whether the neighbouring pixel lies horizontally or vertically adjacent.
+          </p>
+          <p>
+            The test is then repeated independently for each such value of <span class="math">c</span>:
+            <span class="math">z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + c</span>,
+            <span class="math">z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + c</span>,
+            <span class="math">z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + c</span>, and so on. Because nearby values of <span class="math">c</span> can have very different long-term behaviour, one pixel may escape quickly, the next may escape only after many iterations, and another may remain bounded. That sensitivity is exactly what produces the intricate boundary.
+          </p>
         </article>
 
         <article class="card">
-          <h2>Orbit diagram for one point</h2>
+          <h2>Orbit diagram and iteration walkthrough</h2>
           <p>
-            This panel shows the orbit of a chosen complex number <span class="math">c</span>. It is the same iteration used to generate the full image, displayed here term by term.
+            Fix a single value of <span class="math">c</span> and iterate
+            <span class="math">z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c</span>.
+            The green point marks <span class="math">c</span>, the orange points are the successive values
+            <span class="math">z<sub>0</sub>, z<sub>1</sub>, z<sub>2</sub>, ...</span>, and the blue circle is the escape circle
+            <span class="math">|z| = 2</span>.
           </p>
           <div class="fractal-stage" style="aspect-ratio: 1 / 1; min-height: 280px;">
             <canvas id="orbitCanvas" aria-label="Orbit diagram for a selected complex number"></canvas>
           </div>
           <div class="example-row" id="orbitExamples" aria-label="Example orbit points"></div>
+          <div class="control-row">
+            <div class="range-wrap">
+              <label for="orbitRe">
+                <span>Real part of <span class="math">c</span></span>
+                <span id="orbitReReadout">-1.000</span>
+              </label>
+              <input id="orbitRe" type="range" min="-2000" max="600" step="1" value="-1000" />
+            </div>
+            <div class="range-wrap">
+              <label for="orbitIm">
+                <span>Imaginary part of <span class="math">c</span></span>
+                <span id="orbitImReadout">0.000</span>
+              </label>
+              <input id="orbitIm" type="range" min="-1500" max="1500" step="1" value="0" />
+            </div>
+          </div>
           <p class="figure-note" id="orbitReadout">
             Select an example to see whether the orbit stays bounded or escapes.
+          </p>
+          <div class="steps-panel">
+            <h3 style="margin-top:0">First few iterations</h3>
+            <p class="figure-note" style="margin-top:0">
+              Each line below is one actual evaluation of the recurrence for the chosen value of <span class="math">c</span>.
+            </p>
+            <div class="step-list" id="orbitStepList"></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="two-col">
+        <article class="card">
+          <h2>How each pixel is tested</h2>
+          <p>
+            The image is a rectangular window on the complex plane. A pixel at horizontal position <span class="math">p<sub>x</sub></span> and vertical position <span class="math">p<sub>y</sub></span>
+            is converted into a complex number <span class="math">c = a + bi</span> by mapping screen coordinates to the current view.
+          </p>
+          <div class="equation">
+            <span class="math">a = x<sub>centre</sub> + (p<sub>x</sub>/W - 1/2) · scale</span><br />
+            <span class="math">b = y<sub>centre</sub> + (p<sub>y</sub>/H - 1/2) · scale · (H/W)</span>
+          </div>
+          <p>
+            Once that pixel has been assigned its corresponding complex number <span class="math">c</span>, the program performs exactly the same test for that pixel as for every other one:
+          </p>
+          <ol class="number-list">
+            <li>Set <span class="math">z<sub>0</sub> = 0</span>.</li>
+            <li>Compute <span class="math">z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + c = c</span>.</li>
+            <li>Compute <span class="math">z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + c</span>, then <span class="math">z<sub>3</sub></span>, and so on.</li>
+            <li>If an iterate crosses the escape circle <span class="math">|z| = 2</span>, the pixel is classified as outside the Mandelbrot Set.</li>
+            <li>If no escape is detected after the chosen iteration limit, the pixel is coloured as interior or near-boundary.</li>
+          </ol>
+          <p class="muted">
+            The rendered image is therefore a map of long-term behaviour: each pixel records whether its associated orbit escapes, and if so how rapidly.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Why the radius-2 circle is used</h2>
+          <p>
+            The test uses the circle of radius <span class="math">2</span> centred at the origin in the Argand plane. The relevant conditions are
+            <span class="math">|c| &gt; 2</span> or <span class="math">|z| &gt; 2</span>, meaning that the point lies outside that circle. Here the vertical bars denote <strong>absolute value</strong>, that is, distance from the origin in the complex plane.
+          </p>
+          <p>
+            Since <span class="math">z<sub>0</sub> = 0</span>, the first iterate is
+            <span class="math">z<sub>1</sub> = c</span>. Therefore, if <span class="math">|c| &gt; 2</span>, the orbit has already crossed the radius-2 circle at the first step, so that value of <span class="math">c</span> cannot belong to the Mandelbrot Set.
+          </p>
+          <p>
+            A second fact is fundamental for computation: once any later iterate satisfies <span class="math">|z<sub>n</sub>| &gt; 2</span>, the orbit will continue to grow and will not return to a bounded region. That is why the computation may stop as soon as the orbit crosses the circle.
+          </p>
+          <div class="equation">
+            <span class="math">|z<sub>n+1</sub>| = |z<sub>n</sub><sup>2</sup> + c| ≥ |z<sub>n</sub>|<sup>2</sup> - |c|</span>
+          </div>
+          <p>
+            For Mandelbrot testing one only needs to consider <span class="math">|c| ≤ 2</span>, because larger values escape immediately. So after an iterate has moved outside the circle,
+          </p>
+          <div class="equation">
+            <span class="math">|z<sub>n+1</sub>| ≥ |z<sub>n</sub>|<sup>2</sup> - 2</span>
+          </div>
+          <p>
+            If <span class="math">|z<sub>n</sub>| &gt; 2</span>, then <span class="math">|z<sub>n</sub>|<sup>2</sup> - 2 &gt; |z<sub>n</sub>|</span>. So the next term is even farther from the origin:
+          </p>
+          <div class="equation">
+            <span class="math">|z<sub>n+1</sub>| &gt; |z<sub>n</sub>|</span>
+          </div>
+          <p>
+            Once the orbit moves outside the radius-2 circle, the squaring term dominates and the sequence diverges to infinity rather than returning to a bounded region. The orbit diagram above shows this geometrically: after crossing the blue circle, successive points move outward instead of returning toward the origin.
           </p>
         </article>
       </section>
@@ -760,6 +906,30 @@
         <footer>
           Built for <strong>CJF Hal AI</strong>. Files in this folder include <code>index.html</code>, <code>header-logo.svg</code>, <code>favicon.svg</code>, and <code>apple-touch-icon.png</code> for iPhone and iPad home-screen use.
         </footer>
+      </section>
+
+      <section class="two-col">
+        <article class="card">
+          <h2>Julia sets</h2>
+          <p>
+            For a fixed complex number <span class="math">c</span>, the same iteration
+            <span class="math">z \mapsto z<sup>2</sup> + c</span> can be studied for many different starting values of <span class="math">z</span>, rather than always starting from <span class="math">0</span>.
+            The boundary separating points whose orbits escape from those that remain bounded is the <strong>Julia set</strong> for that chosen value of <span class="math">c</span>.
+          </p>
+          <p>
+            The Mandelbrot Set acts as a parameter map for this family: when <span class="math">c</span> lies in the Mandelbrot Set, the corresponding Julia set is connected; when <span class="math">c</span> lies outside it, the Julia set is disconnected and typically dust-like.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Benoit Mandelbrot</h2>
+          <p>
+            <strong>Benoit Mandelbrot</strong> (1924-2010) was a Polish-born French-American mathematician best known for his work on fractal geometry. He worked extensively at IBM and helped show that many irregular forms in mathematics, physics, finance, and nature can be studied through scaling and self-similar structure.
+          </p>
+          <p>
+            The set that now bears his name had been examined in earlier work by Gaston Julia and Pierre Fatou, but Mandelbrot’s use of computer graphics in the late twentieth century made its remarkable structure visible and widely understood. His work transformed fractals from a specialised topic into a major part of modern mathematical culture.
+          </p>
+        </article>
       </section>
     </main>
   </div>
@@ -1237,13 +1407,19 @@
       var ctx = orbitCanvas.getContext("2d");
       var orbitReadout = document.getElementById("orbitReadout");
       var examplesWrap = document.getElementById("orbitExamples");
+      var orbitRe = document.getElementById("orbitRe");
+      var orbitIm = document.getElementById("orbitIm");
+      var orbitReReadout = document.getElementById("orbitReReadout");
+      var orbitImReadout = document.getElementById("orbitImReadout");
+      var orbitStepList = document.getElementById("orbitStepList");
       var examples = [
         { id: "inside", label: "Inside: -1 + 0i", re: -1, im: 0 },
         { id: "outside", label: "Outside: 0.4 + 0.3i", re: 0.4, im: 0.3 },
         { id: "boundary", label: "Near boundary: -0.75 + 0.1i", re: -0.75, im: 0.1 },
         { id: "spiral", label: "Spiral: 0.285 + 0.01i", re: 0.285, im: 0.01 }
       ];
-      var selected = examples[0];
+      var current = { re: examples[0].re, im: examples[0].im };
+      var selectedId = examples[0].id;
 
       function resizeCanvas() {
         var rect = orbitCanvas.getBoundingClientRect();
@@ -1257,23 +1433,70 @@
         return ((x - min) / (max - min)) * size;
       }
 
+      function fmt(value) {
+        var v = Math.abs(value) < 1e-12 ? 0 : value;
+        return v.toFixed(3);
+      }
+
+      function formatComplex(re, im) {
+        return fmt(re) + (im >= 0 ? " + " : " - ") + fmt(Math.abs(im)) + "i";
+      }
+
+      function syncReadouts() {
+        orbitReReadout.textContent = fmt(current.re);
+        orbitImReadout.textContent = fmt(current.im);
+      }
+
+      function syncButtons() {
+        Array.prototype.forEach.call(examplesWrap.children, function (child) {
+          child.classList.toggle("is-selected", child.dataset.id === selectedId);
+        });
+      }
+
       function computeOrbit(re, im, limit) {
         var path = [{ x: 0, y: 0 }];
         var zx = 0;
         var zy = 0;
         var escapedAt = null;
+        var steps = [{
+          label: "z0",
+          text: "z0 = 0.000 + 0.000i",
+          magnitude: 0
+        }];
         for (var i = 0; i < limit; i++) {
+          var prevX = zx;
+          var prevY = zy;
           var nextX = zx * zx - zy * zy + re;
           var nextY = 2 * zx * zy + im;
           zx = nextX;
           zy = nextY;
           path.push({ x: zx, y: zy });
+          steps.push({
+            label: "z" + (i + 1),
+            text: "z" + (i + 1) + " = (" + formatComplex(prevX, prevY) + ")^2 + (" + formatComplex(re, im) + ") = " + formatComplex(zx, zy),
+            magnitude: Math.sqrt(zx * zx + zy * zy)
+          });
           if (zx * zx + zy * zy > 4) {
             escapedAt = i + 1;
             break;
           }
         }
-        return { path: path, escapedAt: escapedAt };
+        return { path: path, escapedAt: escapedAt, steps: steps };
+      }
+
+      function updateStepList(steps, escapedAt) {
+        orbitStepList.innerHTML = "";
+        steps.slice(0, 8).forEach(function (step, index) {
+          var item = document.createElement("div");
+          item.className = "step-item";
+          if (escapedAt && index === escapedAt) item.classList.add("step-item--escape");
+          if (!escapedAt && index === steps.length - 1) item.classList.add("step-item--inside");
+          item.innerHTML =
+            "<strong>" + step.label + "</strong><br>" +
+            step.text + "<br>" +
+            "|z| = " + fmt(step.magnitude);
+          orbitStepList.appendChild(item);
+        });
       }
 
       function drawOrbit() {
@@ -1316,8 +1539,11 @@
         ctx.beginPath();
         ctx.arc(originX, originY, escapeRadiusPx, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.fillStyle = "#7dd3fc";
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.fillText("|z| = 2", originX + escapeRadiusPx - 38, originY - 10);
 
-        var orbit = computeOrbit(selected.re, selected.im, 40);
+        var orbit = computeOrbit(current.re, current.im, 40);
         var pts = orbit.path;
 
         ctx.strokeStyle = "rgba(167, 139, 250, 0.85)";
@@ -1338,10 +1564,14 @@
           ctx.beginPath();
           ctx.arc(x, y, j === 0 ? 5 : 3.5, 0, Math.PI * 2);
           ctx.fill();
+          if (j > 0 && j < 6) {
+            ctx.fillStyle = "#e2e8f0";
+            ctx.fillText(String(j), x + 6, y - 6);
+          }
         }
 
-        var cpx = toPx(selected.re, min, max, w);
-        var cpy = h - toPx(selected.im, min, max, h);
+        var cpx = toPx(current.re, min, max, w);
+        var cpy = h - toPx(current.im, min, max, h);
         ctx.fillStyle = "#34d399";
         ctx.beginPath();
         ctx.arc(cpx, cpy, 6, 0, Math.PI * 2);
@@ -1353,14 +1583,17 @@
         ctx.fillStyle = "#22d3ee";
         ctx.fillText("z0", toPx(0, min, max, w) + 8, h - toPx(0, min, max, h) - 8);
 
+        updateStepList(orbit.steps, orbit.escapedAt);
+
         if (orbit.escapedAt) {
           orbitReadout.innerHTML =
-            "For <span class='math'>c = " + selected.re + (selected.im >= 0 ? " + " : " - ") + Math.abs(selected.im) +
-            "i</span>, the orbit escapes after <strong>" + orbit.escapedAt + "</strong> iterations, so the point is outside the Mandelbrot Set.";
+            "For <span class='math'>c = " + formatComplex(current.re, current.im) +
+            "</span>, the orbit crosses the escape circle after <strong>" + orbit.escapedAt +
+            "</strong> iterations. Once <span class='math'>|z| &gt; 2</span>, subsequent iterates grow without bound, so the corresponding pixel is outside the Mandelbrot Set.";
         } else {
           orbitReadout.innerHTML =
-            "For <span class='math'>c = " + selected.re + (selected.im >= 0 ? " + " : " - ") + Math.abs(selected.im) +
-            "i</span>, the orbit stayed bounded for the first <strong>40</strong> iterations, so the point is inside or extremely close to the boundary.";
+            "For <span class='math'>c = " + formatComplex(current.re, current.im) +
+            "</span>, the orbit remains within the escape circle for the first <strong>40</strong> iterations. The corresponding pixel is therefore in the Mandelbrot Set or extremely close to its boundary.";
         }
       }
 
@@ -1369,23 +1602,45 @@
         btn.type = "button";
         btn.className = "example-btn";
         btn.textContent = example.label;
+        btn.dataset.id = example.id;
         if (index === 0) btn.classList.add("is-selected");
         btn.addEventListener("click", function () {
-          selected = example;
-          Array.prototype.forEach.call(examplesWrap.children, function (child) {
-            child.classList.remove("is-selected");
-          });
-          btn.classList.add("is-selected");
+          current.re = example.re;
+          current.im = example.im;
+          selectedId = example.id;
+          orbitRe.value = String(Math.round(example.re * 1000));
+          orbitIm.value = String(Math.round(example.im * 1000));
+          syncReadouts();
+          syncButtons();
           drawOrbit();
         });
         examplesWrap.appendChild(btn);
       });
+
+      function updateFromSliders() {
+        current.re = (parseInt(orbitRe.value, 10) || 0) / 1000;
+        current.im = (parseInt(orbitIm.value, 10) || 0) / 1000;
+        selectedId = null;
+        examples.forEach(function (example) {
+          if (Math.abs(example.re - current.re) < 0.0005 && Math.abs(example.im - current.im) < 0.0005) {
+            selectedId = example.id;
+          }
+        });
+        syncReadouts();
+        syncButtons();
+        drawOrbit();
+      }
+
+      orbitRe.addEventListener("input", updateFromSliders);
+      orbitIm.addEventListener("input", updateFromSliders);
 
       window.addEventListener("resize", function () {
         resizeCanvas();
         drawOrbit();
       });
 
+      syncReadouts();
+      syncButtons();
       resizeCanvas();
       drawOrbit();
     })();
