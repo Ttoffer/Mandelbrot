@@ -743,6 +743,9 @@
             The computation is repeated for every pixel. The resulting shape is governed by the extraordinarily intricate boundary between stable and unstable behaviour.
           </p>
           <p>
+            In this page the principal Mandelbrot image is not a stored picture. The browser on the local device carries out the iteration for each pixel and renders the image directly on the canvas. Consequently, the view shown on a PC, iPhone, or iPad is produced by computation on that device rather than by displaying a pre-generated fractal image.
+          </p>
+          <p>
             An adjacent pixel is tested by exactly the same procedure, but with a slightly different value of <span class="math">c</span>. The complex plane, often called the <strong>Argand plane</strong>, may be viewed as a coordinate plane: the horizontal axis gives the real part and the vertical axis gives the imaginary part. In that sense it is helpful to think of the image as a map. Adjacent pixels correspond to adjacent coordinates, so each neighbouring pixel represents a nearby complex number.
           </p>
           <p>
@@ -880,9 +883,13 @@
           <ul class="bullet-list">
             <li><strong>Complex dynamics:</strong> it is a central object in studying repeated functions.</li>
             <li><strong>Julia sets:</strong> each value of <span class="math">c</span> has a related Julia set, and the Mandelbrot Set organises which Julia sets are connected.</li>
-            <li><strong>Chaos and stability:</strong> it shows how tiny changes in input can cause huge qualitative changes in long-term behaviour.</li>
+            <li><strong>Chaos and stability:</strong> it shows how tiny changes in input can cause large qualitative changes in long-term behaviour.</li>
             <li><strong>Computation and visualisation:</strong> it is a canonical example of how algorithms render abstract mathematical structure visible.</li>
           </ul>
+          <p>
+            This sensitivity is indeed closely related to the theory of <strong>nonlinear dynamical systems</strong>. The map
+            <span class="math">z \mapsto z<sup>2</sup> + c</span> is nonlinear because of the squaring term. Nonlinear systems commonly exhibit a sharp distinction between stable and unstable behaviour, together with strong dependence on initial conditions or parameters. Near the boundary of the Mandelbrot Set, very small changes in the parameter <span class="math">c</span> can alter the long-term behaviour of the orbit completely, which is why neighbouring pixels may display markedly different colours.
+          </p>
         </article>
       </section>
 
