@@ -6,7 +6,7 @@ This folder contains a **single static web page**, `index.html`, that introduces
 
 for complex numbers **c**.
 
-The page is designed to work as a **desktop and mobile-friendly educational page** with **CJF Hal AI** branding, a browser favicon, and an **Apple touch icon** for iPhone and iPad home-screen use.
+The page is designed to work as a **desktop and mobile-friendly educational page** with **Hal AI by CJF** branding, a browser favicon, and an **Apple touch icon** for iPhone and iPad home-screen use.
 
 ## What the page covers
 
@@ -40,7 +40,7 @@ Open `index.html` in any modern browser, or publish the folder on **GitHub Pages
 |------|---------|
 | `index.html` | Main interactive Mandelbrot page |
 | `README.md` | Project summary and usage notes |
-| `header-logo.svg` | CJF Hal AI header logo used on the page |
+| `header-logo.svg` | Official Hal AI by CJF header logo used on the page |
 | `favicon.svg` | Browser tab icon |
 | `apple-touch-icon.png` | **180 × 180** Apple home-screen icon for iPhone and iPad |
 

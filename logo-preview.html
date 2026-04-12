@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hal AI Logo Preview</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2e;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.18);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #1d2e63 0%, var(--bg) 52%);
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 1.2rem 1rem 2rem;
+    }
+    h1 {
+      margin: 0 0 0.35rem;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+    p {
+      color: var(--muted);
+      margin: 0.4rem 0 1rem;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1rem;
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28);
+    }
+    h2 {
+      margin: 0 0 0.7rem;
+      font-size: 1.05rem;
+    }
+    .full {
+      width: 100%;
+      border-radius: 14px;
+      display: block;
+    }
+    .phone-sim {
+      margin-top: 0.9rem;
+      width: 220px;
+      padding: 0.9rem;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #050812, #111827);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .phone-sim img {
+      width: 180px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+    }
+    .label {
+      margin-top: 0.55rem;
+      font-size: 0.83rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .phone-sim { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Hal AI Logo Preview</h1>
+    <p>
+      Comparison between the current logo and a proposed version with sharper letterforms and a slow animated colour gradient inside the <strong>Hal AI</strong> letters only. The background is unchanged.
+    </p>
+    <div class="grid">
+      <section class="card">
+        <h2>Current</h2>
+        <img src="header-logo.svg" alt="Current Hal AI logo" class="full" />
+        <div class="phone-sim">
+          <img src="header-logo.svg" alt="Current Hal AI logo at reduced size" />
+          <div class="label">Reduced-size preview</div>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Proposed Preview</h2>
+        <img src="header-logo-gradient-preview.svg" alt="Proposed Hal AI logo preview" class="full" />
+        <div class="phone-sim">
+          <img src="header-logo-gradient-preview.svg" alt="Proposed Hal AI logo preview at reduced size" />
+          <div class="label">Reduced-size preview</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
