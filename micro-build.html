@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandelbrot micro build | Mandelbrot sub-project</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --panel: rgba(15, 23, 42, 0.92);
+      --line: rgba(148, 163, 184, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #070b14, var(--bg) 40%, #08111d);
+      padding: 1rem 1rem 2rem;
+    }
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin: 0 0 1rem;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .canvas-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.75rem;
+      background: #050810;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    /* Logical pixels are tiny; scale up so each computed pixel is a visible block */
+    #view {
+      display: block;
+      width: min(96vw, 480px);
+      height: min(96vw, 480px);
+      max-width: 100%;
+      aspect-ratio: 1;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border-radius: 8px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    #view.inspectable {
+      cursor: crosshair;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-top: 0.85rem;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    input[type="range"] { width: 120px; }
+    select, button {
+      font: inherit;
+      font-size: 0.88rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--text);
+      padding: 0.45rem 0.75rem;
+      cursor: pointer;
+    }
+    button:hover { background: rgba(56, 189, 248, 0.22); }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .readout {
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.65rem;
+      word-break: break-all;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    a { color: var(--accent); }
+    #cExplain {
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Mandelbrot: pixel-by-pixel build</h1>
+    <p class="lede">
+      A fixed <strong>100×100</strong> logical-pixel view (same window as the main page’s starting view) is filled
+      in a <strong>square spiral from the centre</strong>, <strong>32 pixels per frame</strong>. Each step runs the usual escape test.
+      If the orbit <strong>never</strong> has |z| &gt; 2 within the iteration budget, there is <strong>no escape</strong> and this page colours the pixel
+      <strong>black</strong> (very dark blue). Escaped pixels get bright colours from the escape speed.
+      When the image is finished, move the pointer over the picture to inspect a pixel—handy next to a bright pixel touching a black one.
+      <a href="index.html">Back to main Mandelbrot page</a>
+    </p>
+    <p class="lede" id="cExplain" style="margin-top:-0.5rem" aria-label="How pixel coordinates map to c"></p>
+
+    <div class="panel">
+      <div class="canvas-wrap">
+        <canvas id="view" width="100" height="100" aria-label="Micro Mandelbrot build animation"></canvas>
+      </div>
+      <div class="controls">
+        <button type="button" id="btnRestart">Restart</button>
+        <button type="button" id="btnPause">Pause</button>
+        <label>
+          Max iterations
+          <input type="range" id="iter" min="40" max="200" value="100" />
+          <span id="iterVal">100</span>
+        </label>
+      </div>
+      <div class="readout" id="readout">Ready.</div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  var canvas = document.getElementById("view");
+  var ctx = canvas.getContext("2d", { willReadFrequently: true });
+  var btnRestart = document.getElementById("btnRestart");
+  var btnPause = document.getElementById("btnPause");
+  var iterEl = document.getElementById("iter");
+  var iterVal = document.getElementById("iterVal");
+  var readout = document.getElementById("readout");
+
+  var FIXED_SIZE = 100;
+  var PIXELS_PER_FRAME = 32;
+
+  /* Match main explorer defaults */
+  var centerX = -0.5;
+  var centerY = 0;
+  var scale = 3.2;
+
+  var imageData;
+  var width;
+  var height;
+  var maxIter;
+  var queue;
+  var qi;
+  var paused = false;
+  var rafId = null;
+  var scanLabel = "Spiral";
+  var buildComplete = false;
+  var lastHoverPx = -1;
+  var lastHoverPy = -1;
+  var INSPECT_HINT =
+    "Image complete. Move the pointer over the fractal to inspect a pixel. No escape (|z| never above 2 in the budget) → black; escape → bright.";
+
+  /** Square spiral from grid centre: right, down, left, up with leg lengths 1,1,2,2,3,3,… */
+  function buildSpiralQueue(w, h) {
+    var cx = Math.floor((w - 1) / 2);
+    var cy = Math.floor((h - 1) / 2);
+    var dx = [1, 0, -1, 0];
+    var dy = [0, 1, 0, -1];
+    var x = cx;
+    var y = cy;
+    var out = [];
+    var seen = {};
+    var needed = w * h;
+
+    function k(a, b) {
+      return a + "," + b;
+    }
+
+    function tryVisit() {
+      if (x < 0 || x >= w || y < 0 || y >= h) return;
+      var key = k(x, y);
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push(x, y);
+    }
+
+    tryVisit();
+
+    var leg = 1;
+    var dir = 0;
+    var maxSteps = needed * 8 + w + h;
+    var steps = 0;
+    while (out.length < needed * 2 && steps < maxSteps) {
+      for (var turn = 0; turn < 2; turn++) {
+        for (var s = 0; s < leg; s++) {
+          x += dx[dir];
+          y += dy[dir];
+          tryVisit();
+          steps++;
+          if (out.length >= needed * 2) return out;
+        }
+        dir = (dir + 1) % 4;
+      }
+      leg++;
+    }
+    return out;
+  }
+
+  function fmtReIm(re, im, decimals) {
+    var d = decimals != null ? decimals : 6;
+    var imAbs = Math.abs(im);
+    var imPart = (im >= 0 ? "+ " : "− ") + imAbs.toFixed(d) + "i";
+    return re.toFixed(d) + " " + imPart;
+  }
+
+  /** Complex parameter c for Mandelbrot at image pixel (px, py): one c per pixel, fixed for all iterations. */
+  function pixelToC(px, py) {
+    var aspect = height / width;
+    return {
+      real: centerX + ((px / width) - 0.5) * scale,
+      imag: centerY + ((py / height) - 0.5) * scale * aspect
+    };
+  }
+
+  /** Mandelbrot for (px,py): returns iter, escaped, |z| after loop, and c. */
+  function samplePixel(px, py) {
+    var c = pixelToC(px, py);
+    var real = c.real;
+    var imag = c.imag;
+    var zx = 0;
+    var zy = 0;
+    var iter = 0;
+    while (zx * zx + zy * zy <= 4 && iter < maxIter) {
+      var x2 = zx * zx - zy * zy + real;
+      var y2 = 2 * zx * zy + imag;
+      zx = x2;
+      zy = y2;
+      iter++;
+    }
+    var mag = Math.sqrt(zx * zx + zy * zy);
+    var escaped = iter < maxIter;
+    return { real: real, imag: imag, iter: iter, escaped: escaped, mag: mag };
+  }
+
+  function formatInspect(px, py) {
+    var s = samplePixel(px, py);
+    var lines = [];
+    lines.push("Pixel (" + px + ", " + py + ")  ·  c = " + fmtReIm(s.real, s.imag, 5));
+    lines.push(
+      "Same c for every step on this pixel: c depends only on (px, py); see the note above the picture for the full mapping."
+    );
+    lines.push("Rule: z0 = 0, then zn+1 = zn² + c until |zn| > 2 (implemented as |zn|² > 4).");
+    if (s.escaped) {
+      lines.push(
+        "After " + s.iter + " iteration(s), |z| ≈ " + s.mag.toFixed(4) + " > 2  →  escaped → bright colour from this count."
+      );
+    } else {
+      lines.push(
+        "After " + maxIter + " iterations, still |z| ≈ " + s.mag.toFixed(4) + " ≤ 2  →  no escape in budget → painted black (interior / limit)."
+      );
+    }
+    var nb = [];
+    if (px > 0) nb.push("W " + fmtNeighbour(samplePixel(px - 1, py)));
+    if (px + 1 < width) nb.push("E " + fmtNeighbour(samplePixel(px + 1, py)));
+    if (py > 0) nb.push("N " + fmtNeighbour(samplePixel(px, py - 1)));
+    if (py + 1 < height) nb.push("S " + fmtNeighbour(samplePixel(px, py + 1)));
+    lines.push("Neighbours: " + nb.join("  ·  "));
+    return lines.join("\n");
+  }
+
+  function fmtNeighbour(s) {
+    if (s.escaped) return "escaped at n=" + s.iter;
+    return "no escape (|z|≤2) → black";
+  }
+
+  function refreshCExplain() {
+    var el = document.getElementById("cExplain");
+    if (!el) return;
+    var w = width;
+    var h = height;
+    var spx = Math.floor((w - 1) / 2);
+    var spy = Math.floor((h - 1) / 2);
+    var cs = pixelToC(spx, spy);
+    var parts = [];
+    parts.push(
+      "How each pixel gets its c (the spiral only changes the order we paint in—it does not change this rule). " +
+        "Column px runs 0…" +
+        (w - 1) +
+        " (left→right), row py runs 0…" +
+        (h - 1) +
+        " (top→bottom). Each pair (px, py) is turned into one complex number c = Re(c) + i·Im(c) that stays fixed for the whole orbit z0, z1, z2, … on that square."
+    );
+    parts.push(
+      "Step 1 — centre the column: (px/" +
+        w +
+        ") − 0.5. At the left edge (px = 0) this is −0.5; at the right edge (px = " +
+        (w - 1) +
+        ") it is about +0.49. So this term is “how far across the image” as a fraction near −0.5…+0.5 instead of 0…1."
+    );
+    parts.push(
+      "Step 2 — width on the real axis: multiply by " +
+        scale +
+        ". That sets the window to " +
+        scale +
+        " units wide on the real line (total span from left column to right column)."
+    );
+    parts.push(
+      "Step 3 — shift the window: add " +
+        centerX +
+        " on the real part and " +
+        centerY +
+        " on the imaginary part so this view matches the main explorer’s starting centre (" +
+        centerX +
+        ", " +
+        centerY +
+        "). Putting steps 1–3 together:"
+    );
+    parts.push(
+      "Re(c) = " +
+        centerX +
+        " + ((px/" +
+        w +
+        ") − 0.5) × " +
+        scale +
+        "\nIm(c) = " +
+        centerY +
+        " + ((py/" +
+        h +
+        ") − 0.5) × " +
+        scale +
+        " × (height/width). On this page height = width = " +
+        w +
+        ", so (height/width) = 1 and the imaginary part is just " +
+        centerY +
+        " + ((py/" +
+        h +
+        ") − 0.5) × " +
+        scale +
+        "."
+    );
+    parts.push(
+      "If the image were not square, (height/width) would stretch the imaginary direction so the on-screen aspect ratio matches the region of the plane you are viewing."
+    );
+    parts.push(
+      "Spiral start pixel: the middle of the grid is (" +
+        spx +
+        ", " +
+        spy +
+        ") (for " +
+        w +
+        "×" +
+        h +
+        ", indices run 0…" +
+        (w - 1) +
+        ", so the centre cell is floor((width - 1) / 2), same for height). The first painted pixel uses that (px, py), which gives c ≈ " +
+        fmtReIm(cs.real, cs.imag, 5) +
+        "."
+    );
+    el.textContent = parts.join("\n\n");
+  }
+
+  function eventToPixel(e) {
+    var rect = canvas.getBoundingClientRect();
+    var sx = canvas.width / rect.width;
+    var sy = canvas.height / rect.height;
+    var px = Math.floor((e.clientX - rect.left) * sx);
+    var py = Math.floor((e.clientY - rect.top) * sy);
+    px = Math.max(0, Math.min(width - 1, px));
+    py = Math.max(0, Math.min(height - 1, py));
+    return { px: px, py: py };
+  }
+
+  function palette(t) {
+    var r = Math.floor(120 + 120 * Math.cos(6.28318 * (t + 0.02)) + 35 * Math.cos(18.8495 * (t + 0.12)));
+    var g = Math.floor(110 + 110 * Math.cos(6.28318 * (t + 0.24)));
+    var b = Math.floor(125 + 120 * Math.cos(6.28318 * (t + 0.53)));
+    return [Math.max(0, Math.min(255, r)), Math.max(0, Math.min(255, g)), Math.max(0, Math.min(255, b))];
+  }
+
+  function colourPixel(px, py) {
+    var c = pixelToC(px, py);
+    var real = c.real;
+    var imag = c.imag;
+    var zx = 0;
+    var zy = 0;
+    var iter = 0;
+    while (zx * zx + zy * zy <= 4 && iter < maxIter) {
+      var x2 = zx * zx - zy * zy + real;
+      var y2 = 2 * zx * zy + imag;
+      zx = x2;
+      zy = y2;
+      iter++;
+    }
+    var idx = (py * width + px) * 4;
+    if (iter >= maxIter) {
+      imageData.data[idx] = 3;
+      imageData.data[idx + 1] = 6;
+      imageData.data[idx + 2] = 14;
+      imageData.data[idx + 3] = 255;
+    } else {
+      var mag = Math.sqrt(zx * zx + zy * zy);
+      var smooth = iter;
+      if (mag > 0) smooth = iter + 1 - Math.log(Math.log(mag)) / Math.log(2);
+      var t = Math.max(0, Math.min(1, smooth / maxIter));
+      var rgb = palette(t);
+      imageData.data[idx] = rgb[0];
+      imageData.data[idx + 1] = rgb[1];
+      imageData.data[idx + 2] = rgb[2];
+      imageData.data[idx + 3] = 255;
+    }
+    return { px: px, py: py, real: real, imag: imag, iter: iter };
+  }
+
+  function buildQueue() {
+    scanLabel = "Spiral";
+    queue = buildSpiralQueue(width, height);
+    qi = 0;
+  }
+
+  function clearToBackground() {
+    for (var i = 0; i < imageData.data.length; i += 4) {
+      imageData.data[i] = 8;
+      imageData.data[i + 1] = 10;
+      imageData.data[i + 2] = 22;
+      imageData.data[i + 3] = 255;
+    }
+  }
+
+  function tick() {
+    if (paused) {
+      rafId = requestAnimationFrame(tick);
+      return;
+    }
+    var perFrame = PIXELS_PER_FRAME;
+    var done = false;
+    for (var n = 0; n < perFrame; n++) {
+      if (qi >= queue.length) {
+        done = true;
+        break;
+      }
+      var px = queue[qi++];
+      var py = queue[qi++];
+      colourPixel(px, py);
+    }
+    ctx.putImageData(imageData, 0, 0);
+    if (!done) {
+      readout.textContent =
+        "[" + scanLabel + "] " + Math.floor(qi / 2) + " / " + (queue.length / 2) + " pixels";
+    }
+    if (done) {
+      buildComplete = true;
+      canvas.classList.add("inspectable");
+      readout.textContent = INSPECT_HINT;
+      btnPause.disabled = true;
+      return;
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function start() {
+    if (rafId) cancelAnimationFrame(rafId);
+    buildComplete = false;
+    lastHoverPx = -1;
+    lastHoverPy = -1;
+    canvas.classList.remove("inspectable");
+    width = FIXED_SIZE;
+    height = FIXED_SIZE;
+    canvas.width = width;
+    canvas.height = height;
+    maxIter = parseInt(iterEl.value, 10) || 100;
+    imageData = ctx.createImageData(width, height);
+    clearToBackground();
+    ctx.putImageData(imageData, 0, 0);
+    buildQueue();
+    refreshCExplain();
+    paused = false;
+    btnPause.textContent = "Pause";
+    btnPause.disabled = false;
+    readout.textContent = "Building…";
+    rafId = requestAnimationFrame(tick);
+  }
+
+  btnRestart.addEventListener("click", start);
+  btnPause.addEventListener("click", function () {
+    paused = !paused;
+    btnPause.textContent = paused ? "Resume" : "Pause";
+  });
+  iterEl.addEventListener("input", function () {
+    iterVal.textContent = iterEl.value;
+  });
+  iterEl.addEventListener("change", start);
+
+  canvas.addEventListener("mousemove", function (e) {
+    if (!buildComplete) return;
+    var p = eventToPixel(e);
+    if (p.px === lastHoverPx && p.py === lastHoverPy) return;
+    lastHoverPx = p.px;
+    lastHoverPy = p.py;
+    readout.textContent = formatInspect(p.px, p.py);
+  });
+  canvas.addEventListener("mouseleave", function () {
+    if (!buildComplete) return;
+    lastHoverPx = -1;
+    lastHoverPy = -1;
+    readout.textContent = INSPECT_HINT;
+  });
+
+  start();
+})();
+  </script>
+</body>
+</html>
