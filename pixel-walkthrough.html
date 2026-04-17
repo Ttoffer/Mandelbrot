@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandelbrot Pixel Walkthrough | CJF Hal AI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.25);
+      --panel: rgba(15, 23, 42, 0.92);
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #070b14, var(--bg) 40%, #08111d);
+      padding: 1rem 1rem 2rem;
+    }
+    .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 1rem;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      margin: 0 0 0.55rem;
+      font-size: 1.06rem;
+    }
+    .math {
+      font-family: ui-monospace, Consolas, "SF Mono", Menlo, monospace;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      color: #dbeafe;
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.85rem;
+    }
+    .ok {
+      color: #86efac;
+    }
+    .warn {
+      color: #fcd34d;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    a { color: var(--accent); }
+    @media (max-width: 700px) {
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Mandelbrot: one pixel worked example</h1>
+    <p class="lede">
+      This page shows one pixel from the same default view used in this project, then walks the calculation
+      step-by-step from <strong>z<sub>0</sub> = 0</strong> until it escapes (|z| &gt; 2). We use a pixel where the fixed
+      parameter <strong>c</strong> is written as <strong>x + i y</strong> with both the real-axis value and the imaginary-axis value
+      non-zero, and show how <strong>|z|</strong> comes from those two axes at each step.
+      <a href="index.html">Back to main Mandelbrot page</a>
+    </p>
+
+    <div class="card">
+      <h2>Chosen pixel, view settings, and c value</h2>
+      <div class="math">Using the same default view settings:
+centerX = -0.5, centerY = 0, scale = 3.2, width = height = 100
+
+What these mean (in plain words):
+- centerX = -0.5: the middle of the image is centred at real value -0.5 on the complex plane.
+- centerY = 0: the middle of the image is centred at imaginary value 0.
+- scale = 3.2: the full visible width of the complex-plane window is 3.2 units.
+  (So each pixel step changes c by about 3.2 / 100 = 0.032 in this 100-pixel view.)
+
+Pick pixel: (px, py) = (91, 51)   (one row below centre so the imaginary part of c is not zero)
+
+Real axis value for c = centerX + ((px / width) - 0.5) * scale
+      = -0.5 + ((91 / 100) - 0.5) * 3.2
+      = -0.5 + (0.91 - 0.5) * 3.2
+      = -0.5 + 1.312
+      = 0.812
+
+Imaginary axis value for c = centerY + ((py / height) - 0.5) * scale * (height / width)
+      = 0 + ((51 / 100) - 0.5) * 3.2 * 1
+      = 0.01 * 3.2
+      = 0.032
+
+So c = 0.812 + 0.032i   (0.812 on the real axis, 0.032 on the imaginary axis — the same x + i y picture as for z)</div>
+    </div>
+
+    <div class="card">
+      <h2>|z| from a complex number</h2>
+      <div class="math">Write any complex number as z = x + i y, where x is the value on the real axis (horizontal)
+and y is the value on the imaginary axis (vertical). Both x and y are ordinary real numbers.
+
+The modulus (size) of z is its distance from 0 in the plane:
+
+|z| = √(x² + y²)
+
+You square the horizontal coordinate, square the vertical coordinate, add, then take the square root.
+(That is not √(x² + (i y)²) — i does not go inside that sum.)
+
+The fixed parameter c for this pixel is 0.812 + 0.032i, so in the same notation:
+
+|c| = √(0.812² + 0.032²) = √0.660368 ≈ 0.8126
+
+At each iterate z<sub>n</sub> = x<sub>n</sub> + i y<sub>n</sub>, we use the same rule:
+
+|z<sub>n</sub>| = √(x<sub>n</sub>² + y<sub>n</sub>²)</div>
+    </div>
+
+    <div class="card">
+      <h2>Iteration rule (written very explicitly)</h2>
+      <div class="math">General rule:
+z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c
+
+Start at n = 0:
+z<sub>0</sub> = 0
+
+Now increase n by 1 each step:
+n = 0 gives z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + c
+n = 1 gives z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + c
+n = 2 gives z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + c
+...and so on.
+
+In plain words: each step squares the previous z value, then adds the same c again.
+
+Write z<sub>n</sub> = x<sub>n</sub> + i y<sub>n</sub>. Then z<sub>n</sub><sup>2</sup> = (x<sub>n</sub>² − y<sub>n</sub>²) + i (2 x<sub>n</sub> y<sub>n</sub>).
+Then z<sub>n+1</sub> = z<sub>n</sub><sup>2</sup> + c adds 0.812 to the real part and 0.032 to the imaginary part (the same c every time).
+
+For this chosen pixel, c = 0.812 + 0.032i for every step.</div>
+    </div>
+
+    <div class="card">
+      <h2>Why the threshold is 2</h2>
+      <div class="math">For Mandelbrot calculations, |z| = 2 is the escape radius.
+
+Key fact:
+once any iterate has |z<sub>n</sub>| &gt; 2, the orbit is guaranteed to run away to infinity.
+
+So in practice we can stop immediately at the first time |z| &gt; 2.
+That pixel is outside the Mandelbrot set.</div>
+    </div>
+
+    <div class="card">
+      <h2>Step-by-step values (with |z| = √(x² + y²) each time)</h2>
+      <div class="math">z<sub>0</sub> = 0 + 0i     →   x<sub>0</sub> = 0, y<sub>0</sub> = 0
+|z<sub>0</sub>| = √(0² + 0²) = 0
+
+z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + c = 0 + (0.812 + 0.032i) = 0.812 + 0.032i
+x<sub>1</sub> = 0.812,  y<sub>1</sub> = 0.032
+|z<sub>1</sub>| = √(x<sub>1</sub>² + y<sub>1</sub>²) = √(0.812² + 0.032²) = √0.660368 ≈ 0.8126  &lt; 2   <span class="ok">(still bounded)</span>
+
+z<sub>1</sub><sup>2</sup> = (x<sub>1</sub>² − y<sub>1</sub>²) + i (2 x<sub>1</sub> y<sub>1</sub>)
+        = (0.659344 − 0.001024) + i (0.051968) = 0.65832 + 0.051968i
+
+z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + c = (0.65832 + 0.812) + i (0.051968 + 0.032) = 1.47032 + 0.083968i
+x<sub>2</sub> = 1.47032,  y<sub>2</sub> = 0.083968
+|z<sub>2</sub>| = √(x<sub>2</sub>² + y<sub>2</sub>²) = √(1.47032² + 0.083968²) ≈ 1.4729  &lt; 2   <span class="ok">(still bounded)</span>
+
+Now z<sub>2</sub><sup>2</sup>. With z<sub>2</sub> = x<sub>2</sub> + i y<sub>2</sub> use (x<sub>2</sub>² − y<sub>2</sub>²) + i (2 x<sub>2</sub> y<sub>2</sub>):
+
+x<sub>2</sub>² = 1.47032² = 2.1619417024
+y<sub>2</sub>² = 0.083968² = 0.007050625024
+real part of z<sub>2</sub><sup>2</sup> = x<sub>2</sub>² − y<sub>2</sub>² = 2.1619417024 − 0.007050625024 = 2.154891077376  →  about 2.154891
+imaginary part of z<sub>2</sub><sup>2</sup> = 2 x<sub>2</sub> y<sub>2</sub> = 2 × 1.47032 × 0.083968 = 0.24694909952  →  about 0.246949
+
+So z<sub>2</sub><sup>2</sup> ≈ 2.154891 + 0.246949i   (the 2.154891 is x<sub>2</sub>² − y<sub>2</sub>², not x<sub>2</sub>² by itself)
+
+z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + c ≈ (2.154891 + 0.812) + i (0.246949 + 0.032) ≈ 2.966891 + 0.278949i
+x<sub>3</sub> ≈ 2.966891,  y<sub>3</sub> ≈ 0.278949
+|z<sub>3</sub>| = √(x<sub>3</sub>² + y<sub>3</sub>²) ≈ √(8.8024 + 0.0778) ≈ 2.980  &gt; 2   <span class="warn">(escape happens here)</span>
+
+After this point we do not need more steps:
+crossing |z| &gt; 2 already guarantees eventual divergence.</div>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h2>What this means for colour</h2>
+        <div class="math">This pixel escaped after 3 iterations,
+so it is outside the Mandelbrot set.
+
+With this page's palette and max iterations = 100,
+this gives approximately RGB(216, 116, 7)
+(a warm orange-gold, not black — same band as the all-real example because escape is still at step 3).</div>
+      </div>
+      <div class="card">
+        <h2>Quick contrast</h2>
+        <div class="math">If a pixel never reaches |z| &gt; 2
+within the chosen iteration limit,
+it is treated as interior/limit and drawn black
+(very dark blue in this palette).</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
