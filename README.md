@@ -28,13 +28,17 @@ The main page is designed to work as a **desktop and mobile-friendly educational
 - **Classic Focus** jumps to a well-known detailed region of the set.
 - **Extra detail** slider increases the base iteration count for sharper boundary detail.
 
-## Micro build (`micro-build.html`)
+## Companion pages
 
-A companion page draws a **100×100** view of the same default region as the explorer, **one pixel at a time** along a **square spiral from the centre** (32 pixels per frame). It includes a plain-language note on **how each pixel’s parameter c is chosen** from `(px, py)`. When the image is complete, **hover** the canvas to see a short summary for that pixel (escape count, **|z| vs 2**, and neighbours), which helps when a **bright** pixel sits next to a **black** (non-escaping) one. Open `micro-build.html` directly, or use the link from `index.html`.
+Both are linked from `index.html` (or open the HTML files directly).
+
+- **`micro-build.html`** — **100×100** default view, painted in a **spiral from the centre** (32 pixels per frame). Short note on how **c** comes from `(px, py)`; when the build finishes, **hover** the canvas for a per-pixel escape summary and neighbours.
+
+- **`pixel-walkthrough.html`** — One worked pixel from the default view: **x + i y**, **|z|**, centre/scale, and step-by-step orbit to escape (including **z²** arithmetic).
 
 ## How to view
 
-Open `index.html` in any modern browser (or `micro-build.html` for the companion demo), or publish the folder on **GitHub Pages** and open the site URL.
+Open `index.html` in any modern browser, or publish the folder on **GitHub Pages** and open the site URL.
 
 **iPhone / iPad:** In Safari, tap **Share → Add to Home Screen**. The file `apple-touch-icon.png` is provided at **180 × 180** for the home-screen icon, and the mobile web app title is set to **Mandelbrot**.
 
@@ -44,6 +48,7 @@ Open `index.html` in any modern browser (or `micro-build.html` for the companion
 |------|---------|
 | `index.html` | Main interactive Mandelbrot page |
 | `micro-build.html` | Small spiral “build” animation, c-mapping note, hover-to-inspect pixels |
+| `pixel-walkthrough.html` | Worked example: one pixel, modulus from x + i y, step-by-step orbit to escape |
 | `README.md` | Project summary and usage notes |
 | `header-logo.svg` | Official Hal AI by CJF header logo used on the page |
 | `favicon.svg` | Browser tab icon |
