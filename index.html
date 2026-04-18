@@ -831,6 +831,9 @@
             <li>If an iterate crosses the escape circle <span class="math">|z| = 2</span>, the pixel is classified as outside the Mandelbrot Set.</li>
             <li>If no escape is detected after the chosen iteration limit, the pixel is coloured as interior or near-boundary.</li>
           </ol>
+          <p>
+            In that test, <span class="math">|z|</span> is the distance from the origin to the point whose horizontal coordinate is the real part of <span class="math">z</span> and whose vertical coordinate is the imaginary part of <span class="math">z</span> — the hypotenuse of that right triangle. Escape means that distance has become greater than <span class="math">2</span>.
+          </p>
           <p class="muted">
             The rendered image is therefore a map of long-term behaviour: each pixel records whether its associated orbit escapes, and if so how rapidly.
           </p>

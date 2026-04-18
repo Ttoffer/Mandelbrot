@@ -32,7 +32,7 @@ The main page is designed to work as a **desktop and mobile-friendly educational
 
 Both are linked from `index.html` (or open the HTML files directly).
 
-- **`micro-build.html`** — **100×100** default view, painted in a **spiral from the centre** (32 pixels per frame). Short note on how **c** comes from `(px, py)`; when the build finishes, **hover** the canvas for a per-pixel escape summary and neighbours.
+- **`micro-build.html`** — **100×100** default view, painted in a **spiral from the centre** (32 pixels per frame). Short note on how **c** comes from `(px, py)`; when the build finishes, **hover** the canvas for a per-pixel escape summary and neighbours. Escape is explained as **|z|** (distance from the origin to **(Re z, Im z)** — the hypotenuse) passing **2**.
 
 - **`pixel-walkthrough.html`** — One worked pixel from the default view: **x + i y**, **|z|**, centre/scale, and step-by-step orbit to escape (including **z²** arithmetic).
 

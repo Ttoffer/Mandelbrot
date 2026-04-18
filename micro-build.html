@@ -121,8 +121,9 @@
     <p class="lede">
       A fixed <strong>100×100</strong> logical-pixel view (same window as the main page’s starting view) is filled
       in a <strong>square spiral from the centre</strong>, <strong>32 pixels per frame</strong>. Each step runs the usual escape test.
-      If the orbit <strong>never</strong> has |z| &gt; 2 within the iteration budget, there is <strong>no escape</strong> and this page colours the pixel
-      <strong>black</strong> (very dark blue). Escaped pixels get bright colours from the escape speed.
+      Treat each iterate <strong>z</strong> as the point <strong>(real part, imaginary part)</strong> in the plane; <strong>|z|</strong> is the distance from the origin — the hypotenuse of the right triangle formed by those two coordinates.
+      If that distance <strong>never</strong> exceeds <strong>2</strong> within the iteration budget, there is <strong>no escape</strong> and this page colours the pixel
+      <strong>black</strong> (very dark blue). When the distance passes 2, the pixel has escaped and gets bright colours from the escape speed.
       When the image is finished, move the pointer over the picture to inspect a pixel—handy next to a bright pixel touching a black one.
       <a href="index.html">Back to main Mandelbrot page</a>
     </p>
@@ -176,7 +177,7 @@
   var lastHoverPx = -1;
   var lastHoverPy = -1;
   var INSPECT_HINT =
-    "Image complete. Move the pointer over the fractal to inspect a pixel. No escape (|z| never above 2 in the budget) → black; escape → bright.";
+    "Image complete. Move the pointer over the fractal to inspect a pixel. |z| is distance from (0,0) to (Re z, Im z) — the hypotenuse; escape when that length > 2. No escape in the budget → black; escape → bright.";
 
   /** Square spiral from grid centre: right, down, left, up with leg lengths 1,1,2,2,3,3,… */
   function buildSpiralQueue(w, h) {
@@ -268,6 +269,9 @@
       "Same c for every step on this pixel: c depends only on (px, py); see the note above the picture for the full mapping."
     );
     lines.push("Rule: z0 = 0, then zn+1 = zn² + c until |zn| > 2 (implemented as |zn|² > 4).");
+    lines.push(
+      "Meaning: plot zn as (Re zn, Im zn). Then |zn| is the hypotenuse from the origin — √(x² + y²) with those coordinates. Escape means that length has passed 2."
+    );
     if (s.escaped) {
       lines.push(
         "After " + s.iter + " iteration(s), |z| ≈ " + s.mag.toFixed(4) + " > 2  →  escaped → bright colour from this count."
